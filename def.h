@@ -1,0 +1,33 @@
+#ifndef DEF
+#define DEF
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+#include <stddef.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdint.h>
+#define true	1
+#define false	0
+
+typedef __uint128_t u128;
+typedef uint64_t u64;
+typedef uint32_t u32;
+typedef uint16_t u16;
+typedef uint8_t u8;
+typedef __int128_t i128;
+typedef int64_t i64;
+typedef int32_t i32;
+typedef int16_t i16;
+typedef int8_t i8;
+typedef char* str;
+typedef void(free_func) (void * obj_ptr);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
