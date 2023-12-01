@@ -1,11 +1,7 @@
 #ifndef MEM_H
 #define MEM_H
 
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <stdint.h>
+#include "../headers/def.h"
 
 
 /// @brief dynamically allocates a copy of an object

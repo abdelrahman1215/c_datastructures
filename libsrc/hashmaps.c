@@ -1,33 +1,29 @@
-#ifndef HASH
-#define HASH
-
-#ifdef __cplusplus
-extern "C"{
-#endif
-
-#include "def.h"
+#include "../headers/hashmaps.h"
 #include "mem.c"
-#include <string.h>
-#include <stdlib.h>
-#include <stdbool.h>
 
-typedef u32(hash_func) (const char * key , u32 limit);
 
-typedef struct entry{
+struct entry{
     str key;
     size_t key_len;
     free_func *free_obj;
     void *obj_ptr;
     size_t obj_size;
     struct entry *next;
-}entry;
+};
 
-typedef struct hashmap{
+struct hashmap{
     size_t size;
     bool list_of_list;
     entry **entries;
     hash_func *hash_ptr;
-}hashmap;
+};
+
+/*void *copy_obj(void *obj_ptr , size_t obj_size){
+    void *copy = calloc(1 , obj_size);
+    memcpy_s(copy , obj_size , obj_ptr , obj_size);
+
+    return copy;
+}*/
 
 u32 hash1(const char *key , u32 limit){
     size_t len = strnlen_s(key , UINT32_MAX);
@@ -83,7 +79,12 @@ static bool init_hashmap(hashmap *map_ptr , size_t size , hash_func *hash_ptr , 
     map_ptr -> size = size;
     map_ptr -> list_of_list = list_of_list;
     map_ptr -> entries = (entry **)calloc(size , sizeof(entry *));
-    if(hash_ptr == NULL){
+
+    if(map_ptr -> entries == NULL){
+        return false;
+    }
+
+    if(!hash_ptr){
         map_ptr -> hash_ptr = def_hash;
     }
     return true;
@@ -91,6 +92,11 @@ static bool init_hashmap(hashmap *map_ptr , size_t size , hash_func *hash_ptr , 
 
 hashmap *new_hashmap(size_t size , hash_func *hash_ptr , bool list_of_list){
     hashmap *ret = (hashmap *)calloc(1 , sizeof(hashmap));
+
+    if(!ret){
+        return ret;
+    }
+
     if(!init_hashmap(ret , size , hash_ptr , list_of_list)){
         free(ret);
         return NULL;
@@ -144,14 +150,26 @@ bool hashmap_add_element(const char *key , void *obj_ptr , size_t obj_size , fre
     *node_ptr = (entry *)calloc(1 , sizeof(entry));
 
     entry *target = *node_ptr;
+    if(!node_ptr){
+        return false;
+    }
 
     target -> key_len = strnlen_s(key , UINT32_MAX);
     target -> key = copy_obj((void *)key , target -> key_len + 1);/*(char *)calloc(target -> key_len + 1 , 1);
     strcpy_s(target -> key , target -> key_len + 1 , key);*/
+    if(!target -> key){
+        free(target);
+        return false;
+    }
 
     target -> obj_size = obj_size;
     target -> obj_ptr = copy_obj(obj_ptr , obj_size);/*calloc(1 , obj_size);
     memcpy_s(target -> obj_ptr , obj_size , obj_ptr , obj_size);*/
+    if(!target -> obj_ptr){
+        free(target -> key);
+        free(target);
+        return false;
+    }
 
     target -> next = NULL;
 
@@ -265,9 +283,3 @@ bool hashmap_edit_entry(const char *key , hashmap *map_ptr , void *new_val_ptr ,
     }
     return true;
 }
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
