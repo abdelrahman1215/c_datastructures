@@ -1,1 +1,1 @@
-an implimentation of some known data structures in c
+a simple implimentation of some known data structures in c
