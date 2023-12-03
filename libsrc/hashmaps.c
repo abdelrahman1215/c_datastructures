@@ -1,5 +1,7 @@
-#include "../headers/hashmaps.h"
 #include "mem.c"
+#include <string.h>
+#include <stdlib.h>
+#include "../headers/hashmaps.h"
 
 
 struct entry{
@@ -17,13 +19,6 @@ struct hashmap{
     entry **entries;
     hash_func *hash_ptr;
 };
-
-/*void *copy_obj(void *obj_ptr , size_t obj_size){
-    void *copy = calloc(1 , obj_size);
-    memcpy_s(copy , obj_size , obj_ptr , obj_size);
-
-    return copy;
-}*/
 
 u32 hash1(const char *key , u32 limit){
     size_t len = strnlen_s(key , UINT32_MAX);
@@ -44,7 +39,7 @@ u32 hash1(const char *key , u32 limit){
 }
 
 u32 hash2(const char *key , u32 limit){
-    u32 h = 0x12345678;\
+    u32 h = 0x12345678;
 
     for (size_t i = 0 ; key[i] ; i++) {
         h ^= key[i];
@@ -124,9 +119,11 @@ void destroy_hashmap(hashmap *map_ptr){
     map_ptr -> size = 0;
     map_ptr -> entries = NULL;
     map_ptr -> hash_ptr = NULL;
+
+    free(map_ptr);
 }
 
-bool hashmap_add_element(const char *key , void *obj_ptr , size_t obj_size , free_func *free_func_ptr , hashmap *map_ptr){
+bool hashmap_add_entry(const char *key , void *obj_ptr , size_t obj_size , free_func *free_func_ptr , hashmap *map_ptr){
     if(!key[0]){
         return false;
     }
@@ -182,7 +179,7 @@ bool hashmap_add_element(const char *key , void *obj_ptr , size_t obj_size , fre
     return true;
 }
 
-bool hashmap_delete_element(const char* key , hashmap *map_ptr){
+bool hashmap_delete_entry(const char* key , hashmap *map_ptr){
     if(!key[0]){
         return false;
     }
@@ -247,39 +244,10 @@ entry *hashmap_lookup_entry(const char *key , hashmap *map_ptr){
     return NULL;
 }
 
-void *hashmap_lookup_obj(const char *key , hashmap *map_ptr){
-    entry *target_entry = hashmap_lookup_entry(key , map_ptr);
-
-    if(target_entry == NULL){
-        return NULL;
-    }else{
-        return target_entry -> obj_ptr;
-    }
+void *get_obj_ptr(entry *entry_ptr){
+    return entry_ptr -> obj_ptr;
 }
 
-bool hashmap_edit_entry(const char *key , hashmap *map_ptr , void *new_val_ptr , size_t new_val_size , free_func new_free_func_ptr){
-    if(!key || !map_ptr || !new_val_ptr || !new_val_size){
-        return false;
-    }
-
-    if(!key[0]){
-        return false;
-    }
-
-    entry *target = hashmap_lookup_entry(key , map_ptr);
-
-    if(!target){
-        return false;
-    }
-
-    free_func *free_obj = target -> free_obj;
-    free_obj(target -> obj_ptr);
-    target -> obj_ptr = copy_obj(new_val_ptr , new_val_size);
-
-    target -> obj_size = new_val_size;
-
-    if(new_free_func_ptr){
-        target -> free_obj = new_free_func_ptr;
-    }
-    return true;
+size_t get_obj_size(entry *entry_ptr){
+    return entry_ptr -> obj_size;
 }

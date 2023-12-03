@@ -1,5 +1,9 @@
-#ifndef MEM_H
-#define MEM_H
+#ifndef MEM_C
+#define MEM_C
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "../headers/def.h"
 
@@ -15,8 +19,8 @@ void *copy_obj(void *obj_ptr , size_t obj_size){
     return copy;
 }
 
-u64 hash_ptr(void *ptr){
-    return ~(u64)ptr;
+#ifdef __cplusplus
 }
+#endif
 
 #endif
