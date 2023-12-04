@@ -67,7 +67,7 @@ u32 def_hash(const char *key , u32 limit){
 }
 
 static bool init_hashmap(hashmap *map_ptr , size_t size , hash_func *hash_ptr , bool list_of_list){
-    if(size == 0){
+    if(!size || !map_ptr){
         return false;
     }
 
@@ -89,7 +89,7 @@ hashmap *new_hashmap(size_t size , hash_func *hash_ptr , bool list_of_list){
     hashmap *ret = (hashmap *)calloc(1 , sizeof(hashmap));
 
     if(!ret){
-        return ret;
+        return NULL;
     }
 
     if(!init_hashmap(ret , size , hash_ptr , list_of_list)){
@@ -100,17 +100,27 @@ hashmap *new_hashmap(size_t size , hash_func *hash_ptr , bool list_of_list){
     return ret;
 }
 
+void free_entry(entry *entry_ptr){
+    if(!entry_ptr){
+        return;
+    }
+
+    entry_ptr -> free_obj(entry_ptr -> obj_ptr);
+    free(entry_ptr -> key);
+    free(entry_ptr);
+}
+
 void destroy_hashmap(hashmap *map_ptr){
+    if(map_ptr == NULL){
+        return;
+    }
+
     entry **entries = map_ptr -> entries;
-    free_func *free_obj = NULL;
 
     for(size_t i = 0 ; i < map_ptr -> size ; i++){
         for(entry *j = entries[i] , *tmp ; j != NULL ; j = tmp){
             tmp = j -> next;
-            free_obj = j -> free_obj;
-            free_obj(j -> obj_ptr);
-            free(j -> key);
-            free(j);
+            free_entry(j);
         }
     }
 
@@ -133,10 +143,12 @@ bool hashmap_add_entry(const char *key , void *obj_ptr , size_t obj_size , free_
 
     entry **node_ptr = map_ptr -> entries + index;
     for(entry *curr_node = *node_ptr ; curr_node != NULL && map_ptr -> list_of_list == true ; node_ptr = &curr_node -> next , curr_node = curr_node -> next){
-        if(curr_node -> key_len == key_len && curr_node -> key[0] == key[0]){
-            if(!strcmp(curr_node -> key , key)){
-                return false;
-            }
+        if(curr_node -> key_len != key_len || curr_node -> key[0] != key[0]){
+            continue;
+        }
+        
+        if(!strcmp(curr_node -> key , key)){
+            return false;
         }
     }
 
@@ -152,7 +164,7 @@ bool hashmap_add_entry(const char *key , void *obj_ptr , size_t obj_size , free_
     }
 
     target -> key_len = strnlen_s(key , UINT32_MAX);
-    target -> key = copy_obj((void *)key , target -> key_len + 1);/*(char *)calloc(target -> key_len + 1 , 1);
+    target -> key = copy_object((void *)key , target -> key_len + 1);/*(char *)calloc(target -> key_len + 1 , 1);
     strcpy_s(target -> key , target -> key_len + 1 , key);*/
     if(!target -> key){
         free(target);
@@ -160,7 +172,7 @@ bool hashmap_add_entry(const char *key , void *obj_ptr , size_t obj_size , free_
     }
 
     target -> obj_size = obj_size;
-    target -> obj_ptr = copy_obj(obj_ptr , obj_size);/*calloc(1 , obj_size);
+    target -> obj_ptr = copy_object(obj_ptr , obj_size);/*calloc(1 , obj_size);
     memcpy_s(target -> obj_ptr , obj_size , obj_ptr , obj_size);*/
     if(!target -> obj_ptr){
         free(target -> key);
@@ -212,10 +224,7 @@ bool hashmap_delete_entry(const char* key , hashmap *map_ptr){
     }
 
     entry *target = node;
-    free_func *free_obj = target -> free_obj;
-    free_obj(target -> obj_ptr);
-    free(target -> key);
-    free(target);
+    free_entry(target);
 
     return true;
 }
@@ -244,10 +253,10 @@ entry *hashmap_lookup_entry(const char *key , hashmap *map_ptr){
     return NULL;
 }
 
-void *get_obj_ptr(entry *entry_ptr){
+void *hashmap_get_obj_ptr(entry *entry_ptr){
     return entry_ptr -> obj_ptr;
 }
 
-size_t get_obj_size(entry *entry_ptr){
+size_t hashmap_get_obj_size(entry *entry_ptr){
     return entry_ptr -> obj_size;
 }

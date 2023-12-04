@@ -12,8 +12,12 @@ extern "C" {
 /// @param obj_ptr a pointer to the object
 /// @param obj_size the size of the object
 /// @return a pointer to the copy
-void *copy_obj(void *obj_ptr , size_t obj_size){
+void *copy_object(void *obj_ptr , size_t obj_size){
     void *copy = calloc(1 , obj_size);
+    if(!copy){
+        return NULL;
+    }
+
     memcpy_s(copy , obj_size , obj_ptr , obj_size);
 
     return copy;
