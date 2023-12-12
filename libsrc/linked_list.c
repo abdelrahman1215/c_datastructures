@@ -1,6 +1,6 @@
 #include "mem.c"
 #include <stdlib.h>
-#include "../headers/linked_lists.h"
+#include "../headers/linked_list.h"
 
 struct node {
     struct node *prev;
@@ -31,7 +31,7 @@ void linked_list_free_node(node *node_ptr){
     free(node_ptr);
 }
 
-void destroy_linked_list(linked_list *list_ptr){
+void free_linked_list_contents(linked_list *list_ptr){
     if(!list_ptr){
         return;
     }
@@ -41,10 +41,28 @@ void destroy_linked_list(linked_list *list_ptr){
         linked_list_free_node(curr_node);
     }
 
+    list_ptr -> first_node = NULL;
+    list_ptr -> last_node = NULL;
+    list_ptr -> node_no = 0;
+}
+
+void destroy_linked_list(linked_list *list_ptr){
+    if(!list_ptr){
+        return;
+    }
+
+    if(list_ptr -> first_node){
+        free_linked_list_contents(list_ptr);
+    }
+
     free(list_ptr);
 }
 
 node *linked_list_create_node(void *obj_ptr , size_t obj_size , free_func *free_obj){
+    if(!obj_ptr || !obj_size){
+        return NULL;
+    }
+
     node *ret = (node *) calloc(1 , sizeof(node));
     if(!ret){
         return NULL;
@@ -68,7 +86,7 @@ node *linked_list_create_node(void *obj_ptr , size_t obj_size , free_func *free_
 }
 
 bool linked_list_add_node(void *obj_ptr , size_t obj_size , free_func *free_obj , linked_list *list_ptr){
-    if(!obj_ptr || !list_ptr){
+    if(!obj_ptr || !list_ptr || !obj_size){
         return false;
     }
 

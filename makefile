@@ -1,14 +1,14 @@
 test:
-	gcc -Wall -g3 -o test.exe test.c -Lbin -lhashmaps -llinked_lists
+	gcc -Wall -g3 -o test.exe test.c -Lbin -lhashmaps -llinked_lists --save-temps
 
-hashmaps:
-	gcc -c libsrc/hashmaps.c -o bin/hashmaps.o
-	ar rcs bin/libhashmaps.a bin/hashmaps.o
+hashmap:
+	gcc -c libsrc/hashmap.c -o bin/hashmap.o
+	ar rcs bin/libhashmap.a bin/hashmap.o
 	
-lists:
-	gcc -c libsrc/linked_lists.c -o bin/linked_lists.o
-	ar rcs bin/liblinked_lists.a bin/linked_lists.o
+linked_list:
+	gcc -c libsrc/linked_list.c -o bin/linked_list.o
+	ar rcs bin/liblinked_list.a bin/linked_list.o
 
 libs:
-	make hashmaps
-	make lists
+	make hashmap
+	make linked_list

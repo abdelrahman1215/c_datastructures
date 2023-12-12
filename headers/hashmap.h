@@ -1,5 +1,5 @@
-#ifndef HASH
-#define HASH
+#ifndef HASH_MAP
+#define HASH_MAP
 
 #ifdef __cplusplus
 extern "C"{
@@ -21,9 +21,13 @@ typedef struct hashmap hashmap;
 /// @return returns a pointer to the hashmap
 hashmap *new_hashmap(size_t size , hash_func *hash_ptr , bool list_of_list);
 
-/// @brief frees a hashmap
+/// @brief frees a hashmap & its contents
 /// @param map_ptr a pointer to the hashmap
 void destroy_hashmap(hashmap *map_ptr);
+
+/// @brief frees the contents of a hashmap (you still have to free the hashmap it self)
+/// @param map_ptr a pointer to the map
+void free_hashmap_contents(hashmap *map_ptr);
 
 //--------------------------------
 

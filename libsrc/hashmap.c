@@ -1,7 +1,7 @@
 #include "mem.c"
 #include <string.h>
 #include <stdlib.h>
-#include "../headers/hashmaps.h"
+#include "../headers/hashmap.h"
 
 
 struct entry{
@@ -74,7 +74,6 @@ static bool init_hashmap(hashmap *map_ptr , size_t size , hash_func *hash_ptr , 
     map_ptr -> size = size;
     map_ptr -> list_of_list = list_of_list;
     map_ptr -> entries = (entry **)calloc(size , sizeof(entry *));
-
     if(map_ptr -> entries == NULL){
         return false;
     }
@@ -87,7 +86,6 @@ static bool init_hashmap(hashmap *map_ptr , size_t size , hash_func *hash_ptr , 
 
 hashmap *new_hashmap(size_t size , hash_func *hash_ptr , bool list_of_list){
     hashmap *ret = (hashmap *)calloc(1 , sizeof(hashmap));
-
     if(!ret){
         return NULL;
     }
@@ -110,8 +108,8 @@ void free_entry(entry *entry_ptr){
     free(entry_ptr);
 }
 
-void destroy_hashmap(hashmap *map_ptr){
-    if(map_ptr == NULL){
+void free_hashmap_contents(hashmap *map_ptr){
+    if(!map_ptr){
         return;
     }
 
@@ -129,12 +127,26 @@ void destroy_hashmap(hashmap *map_ptr){
     map_ptr -> size = 0;
     map_ptr -> entries = NULL;
     map_ptr -> hash_ptr = NULL;
+}
+
+void destroy_hashmap(hashmap *map_ptr){
+    if(!map_ptr){
+        return;
+    }
+
+    if(map_ptr -> entries){
+        free_hashmap_contents(map_ptr);
+    }
 
     free(map_ptr);
 }
 
 bool hashmap_add_entry(const char *key , void *obj_ptr , size_t obj_size , free_func *free_func_ptr , hashmap *map_ptr){
-    if(!key[0]){
+    if(!key[0] || !map_ptr || !obj_ptr || !obj_size){
+        return false;
+    }
+
+    if(!map_ptr -> entries){
         return false;
     }
 
@@ -192,7 +204,11 @@ bool hashmap_add_entry(const char *key , void *obj_ptr , size_t obj_size , free_
 }
 
 bool hashmap_delete_entry(const char* key , hashmap *map_ptr){
-    if(!key[0]){
+    if(!key[0] || !map_ptr){
+        return false;
+    }
+
+    if(!map_ptr -> entries){
         return false;
     }
 
@@ -230,8 +246,12 @@ bool hashmap_delete_entry(const char* key , hashmap *map_ptr){
 }
 
 entry *hashmap_lookup_entry(const char *key , hashmap *map_ptr){
-    if(!key[0]){
+    if(!key[0] || !map_ptr){
         return NULL;
+    }
+
+    if(!map_ptr -> entries){
+        return false;
     }
 
     u32 index = map_ptr -> hash_ptr(key , map_ptr -> size);
@@ -254,9 +274,17 @@ entry *hashmap_lookup_entry(const char *key , hashmap *map_ptr){
 }
 
 void *hashmap_get_obj_ptr(entry *entry_ptr){
+    if(!entry_ptr){
+        return NULL;
+    }
+
     return entry_ptr -> obj_ptr;
 }
 
 size_t hashmap_get_obj_size(entry *entry_ptr){
+    if(!entry_ptr){
+        return 0;
+    }
+    
     return entry_ptr -> obj_size;
 }

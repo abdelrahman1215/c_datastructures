@@ -16,9 +16,13 @@ typedef struct linked_list linked_list;
 /// @return a pointer to the newly made linked list
 linked_list *new_linked_list();
 
-/// @brief frees a linked list
-/// @param list_ptr a pointer to the linnked list
+/// @brief frees a linked list & its contents
+/// @param list_ptr a pointer to the linked list
 void destroy_linked_list(linked_list *list_ptr);
+
+/// @brief frees the contents of a linkedlist (you still have to free the linked list it self)
+/// @param list_ptr a pointer to the linked list
+void free_linked_list_contents(linked_list *list_ptr);
 
 //--------------------------------
 
