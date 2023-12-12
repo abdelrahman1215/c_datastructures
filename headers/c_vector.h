@@ -93,8 +93,12 @@ c_vector *new_c_vector(size_t obj_size , free_func free_obj_contents){
     return ret;
 }
 
-void destroy_c_vector(c_vector *vec_ptr){
+void free_c_vector_contents(c_vector *vec_ptr){
     if(!vec_ptr){
+        return;
+    }
+
+    if(!vec_ptr -> chunks_ptr){
         return;
     }
 
@@ -111,6 +115,20 @@ void destroy_c_vector(c_vector *vec_ptr){
     }
 
     free(vec_ptr -> chunks_ptr);
+    vec_ptr -> chunks_ptr = NULL;
+    vec_ptr -> chunk_no = 0;
+}
+
+void destroy_c_vector(c_vector *vec_ptr){
+    if(!vec_ptr){
+        return;
+    }
+
+    if(!vec_ptr -> chunks_ptr){
+        return;
+    }
+
+    free_c_vector_contents(vec_ptr);
     free(vec_ptr);
 }
 
@@ -121,7 +139,13 @@ bool c_vector_add_elment(c_vector *vec_ptr , void *obj_ptr){
 
     //allocate a new chunk if the last chunk is full
     if(vec_ptr -> chunks_ptr[vec_ptr -> chunk_no - 1] -> used_size == vec_ptr -> chunk_size){
-        mem_chunk **tmp = (mem_chunk **)realloc(vec_ptr -> chunks_ptr , sizeof(mem_chunk *) * (vec_ptr -> chunk_no));
+        mem_chunk **tmp;
+        if(vec_ptr -> chunk_no > 0){
+            tmp = (mem_chunk **)realloc(vec_ptr -> chunks_ptr , sizeof(mem_chunk *) * (vec_ptr -> chunk_no));
+        }else{
+            tmp = (mem_chunk **)calloc(1 , sizeof(mem_chunk *));
+        }
+
         if(!tmp){
             return false;
         }

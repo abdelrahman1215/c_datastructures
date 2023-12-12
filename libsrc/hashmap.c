@@ -71,10 +71,14 @@ static bool init_hashmap(hashmap *map_ptr , size_t size , hash_func *hash_ptr , 
         return false;
     }
 
+    if(map_ptr -> entries){
+        return false;
+    }
+
     map_ptr -> size = size;
     map_ptr -> list_of_list = list_of_list;
     map_ptr -> entries = (entry **)calloc(size , sizeof(entry *));
-    if(map_ptr -> entries == NULL){
+    if(!map_ptr -> entries){
         return false;
     }
 
@@ -113,6 +117,10 @@ void free_hashmap_contents(hashmap *map_ptr){
         return;
     }
 
+    if(!map_ptr -> entries){
+        return;
+    }
+
     entry **entries = map_ptr -> entries;
 
     for(size_t i = 0 ; i < map_ptr -> size ; i++){
@@ -126,7 +134,6 @@ void free_hashmap_contents(hashmap *map_ptr){
 
     map_ptr -> size = 0;
     map_ptr -> entries = NULL;
-    map_ptr -> hash_ptr = NULL;
 }
 
 void destroy_hashmap(hashmap *map_ptr){
@@ -165,7 +172,7 @@ bool hashmap_add_entry(const char *key , void *obj_ptr , size_t obj_size , free_
     }
 
     if(*node_ptr != NULL){
-        return false;
+        init_hashmap(map_ptr , map_ptr -> size , map_ptr -> hash_ptr , map_ptr -> list_of_list);
     }
     
     *node_ptr = (entry *)calloc(1 , sizeof(entry));
@@ -251,7 +258,7 @@ entry *hashmap_lookup_entry(const char *key , hashmap *map_ptr){
     }
 
     if(!map_ptr -> entries){
-        return false;
+        return NULL;
     }
 
     u32 index = map_ptr -> hash_ptr(key , map_ptr -> size);

@@ -165,29 +165,57 @@ bool linked_list_delete_node(u64 index , linked_list *list_ptr){
 }
 
 node *linked_list_get_first_node(linked_list *list_ptr){
+    if(!list_ptr){
+        return NULL;
+    }
+
     return list_ptr -> first_node;
 }
 
 node *linked_list_get_last_node(linked_list *list_ptr){
+    if(!list_ptr){
+        return NULL;
+    }
+
     return list_ptr -> last_node;
 }
 
 u64 linked_list_get_node_no(linked_list *list_ptr){
+    if(!list_ptr){
+        return 0;
+    }
+
     return list_ptr -> node_no;
 }
 
 node *linked_list_get_prev_node(node *node_ptr){
+    if(!node_ptr){
+        return NULL;
+    }
+
     return node_ptr -> prev;
 }
 
 node *linked_list_get_next_node(node *node_ptr){
+    if(!node_ptr){
+        return NULL;
+    }
+
     return node_ptr -> next;
 }
 
 void *linked_list_get_obj_ptr(node *node_ptr){
+    if(!node_ptr){
+        return NULL;
+    }
+
     return node_ptr -> obj_ptr;
 }
 
 size_t linked_list_get_obj_size(node *node_ptr){
+    if(!node_ptr){
+        return 0;
+    }
+
     return node_ptr -> obj_size;
 }
