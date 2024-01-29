@@ -1,5 +1,5 @@
 test:
-	gcc -Wall -g3 -o test.exe test.c -Lbin -lhashmaps -llinked_lists --save-temps
+	gcc -Wall -g3 -o test.exe test.c -Lbin -lhashmaps -llinked_lists
 
 hashmap:
 	gcc -c libsrc/hashmap.c -o bin/hashmap.o
