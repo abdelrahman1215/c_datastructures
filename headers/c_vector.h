@@ -8,7 +8,6 @@ extern "C"{
 #include "def.h"
 #include "../libsrc/mem.c"
 #include <stdlib.h>
-#include <stdio.h>
 
 #define CHUNK_SIZE 4096
 #define MAX_OBJECT_SIZE 16
@@ -129,11 +128,10 @@ void destroy_c_vector(c_vector *vec_ptr){
         return;
     }
 
-    if(!vec_ptr -> chunks_ptr){
-        return;
+    if(vec_ptr -> chunks_ptr){
+        free_c_vector_contents(vec_ptr);
     }
 
-    free_c_vector_contents(vec_ptr);
     free(vec_ptr);
 }
 
@@ -207,7 +205,42 @@ static void *c_vector_get_element_ptr(c_vector *vec_ptr , u64 index){
     return (char *)target_chunk -> mem_ptr + ((index % elements_per_chunk) * vec_ptr -> obj_rounded_size);
 }
 
-bool c_vector_delete_element(c_vector *vec_ptr , u64 index){
+bool c_vector_remove_last_chunk(c_vector *vec_ptr){
+    if(!vec_ptr){
+        return false;
+    }
+
+    if(vec_ptr -> chunk_no == 0){
+        return false;
+    }
+
+    mem_chunk *target = vec_ptr -> chunks_ptr[vec_ptr -> chunk_no - 1];
+
+    for(char *i = target -> mem_ptr ; vec_ptr -> free_obj_contents && i < (char *)target -> mem_ptr + target -> used_size ; i += vec_ptr -> obj_rounded_size){
+        vec_ptr -> free_obj_contents(i);
+    }
+
+    free(target -> mem_ptr);
+
+    mem_chunk **tmp = NULL;
+    if(vec_ptr -> chunk_no == 1){
+        free(vec_ptr -> chunks_ptr);
+        vec_ptr -> chunks_ptr = NULL;
+        return true;
+    }else if(vec_ptr -> chunk_no > 1){
+        tmp = (mem_chunk **)realloc(vec_ptr -> chunks_ptr , sizeof(mem_chunk *) * (--vec_ptr -> chunk_no));
+    }
+
+    if(!tmp){
+        return false;
+    }
+
+    vec_ptr -> chunks_ptr = tmp;
+
+    return true;
+}
+
+bool c_vector_remove_element(c_vector *vec_ptr , u64 index){
     if(!vec_ptr){
         return false;
     }
@@ -284,7 +317,7 @@ bool c_vector_edit_element(c_vector *vec_ptr , u64 index , void *new_val_ptr){
 void *c_vector_get_element(c_vector *vec_ptr , u64 index){
     void *target = c_vector_get_element_ptr(vec_ptr , index);
 
-    if(target == NULL){
+    if(!target){
         return NULL;
     }
 
