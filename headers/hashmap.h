@@ -25,10 +25,6 @@ hashmap *new_hashmap(size_t size , hash_func *hash_ptr , bool list_of_list);
 /// @param map_ptr a pointer to the hashmap
 void destroy_hashmap(hashmap *map_ptr);
 
-/// @brief frees the contents of a hashmap (you still have to free the hashmap it self)
-/// @param map_ptr a pointer to the map
-void free_hashmap_contents(hashmap *map_ptr);
-
 //--------------------------------
 
 /// @brief adds an element to a hashmap

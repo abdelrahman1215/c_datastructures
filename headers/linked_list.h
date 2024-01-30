@@ -20,10 +20,6 @@ linked_list *new_linked_list();
 /// @param list_ptr a pointer to the linked list
 void destroy_linked_list(linked_list *list_ptr);
 
-/// @brief frees the contents of a linkedlist (you still have to free the linked list it self)
-/// @param list_ptr a pointer to the linked list
-void free_linked_list_contents(linked_list *list_ptr);
-
 //--------------------------------
 
 /// @brief adds a node to a linked list

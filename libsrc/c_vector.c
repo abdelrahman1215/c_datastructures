@@ -15,7 +15,7 @@ struct c_vector {
 
     size_t obj_actual_size;
     size_t obj_rounded_size;
-    free_func *free_obj_contents;
+    free_func *free_obj;
 
     mem_chunk **chunks_ptr;
     u64 chunk_no;
@@ -55,8 +55,8 @@ mem_chunk *allocate_mem_chunk(size_t chunk_size){
     return ret;
 }
 
-c_vector *new_c_vector(size_t obj_size , free_func free_obj_contents){
-    if(!obj_size || obj_size > MAX_OBJECT_SIZE){
+c_vector *new_c_vector(size_t obj_size , free_func free_obj){
+    if(obj_size == 0 || obj_size > MAX_OBJECT_SIZE){
         return NULL;
     }
 
@@ -82,7 +82,7 @@ c_vector *new_c_vector(size_t obj_size , free_func free_obj_contents){
     ret -> chunk_no = 1;
     ret -> obj_actual_size = obj_size;
     ret -> obj_rounded_size = round_to_next_power_of_two((u64)obj_size);
-    ret -> free_obj_contents = free_obj_contents;
+    ret -> free_obj = free_obj;
 
     return ret;
 }
@@ -98,9 +98,9 @@ void free_c_vector_contents(c_vector *vec_ptr){
 
     for(size_t  i = 0 ; i < vec_ptr -> chunk_no ; i++){
         mem_chunk *curr_chunk = vec_ptr -> chunks_ptr[i];
-        if(vec_ptr -> free_obj_contents){
+        if(vec_ptr -> free_obj){
             for(char *j = (char *)curr_chunk -> mem_ptr ; j < (char *)curr_chunk -> mem_ptr + curr_chunk -> used_size ; j += vec_ptr -> obj_rounded_size){
-                vec_ptr -> free_obj_contents(j);
+                vec_ptr -> free_obj(copy_object(j , vec_ptr -> obj_actual_size));
             }
         }
 
@@ -213,8 +213,8 @@ bool c_vector_remove_last_chunk(c_vector *vec_ptr){
         return false;
     }
 
-    for(char *i = target -> mem_ptr ; vec_ptr -> free_obj_contents && i < (char *)target -> mem_ptr + target -> used_size ; i += vec_ptr -> obj_rounded_size){
-        vec_ptr -> free_obj_contents(i);
+    for(char *i = target -> mem_ptr ; vec_ptr -> free_obj && i < (char *)target -> mem_ptr + target -> used_size ; i += vec_ptr -> obj_rounded_size){
+        vec_ptr -> free_obj(copy_object(i , vec_ptr -> obj_actual_size));
     }
 
     free(target -> mem_ptr);
@@ -239,11 +239,10 @@ bool c_vector_remove_element(c_vector *vec_ptr , u64 index){
 
     void *target = c_vector_get_element_ptr(vec_ptr , index);
 
-    if(vec_ptr -> free_obj_contents){
-        vec_ptr -> free_obj_contents(target);
+    if(vec_ptr -> free_obj){
+        vec_ptr -> free_obj(copy_object(target , vec_ptr -> obj_actual_size));
     }
 
-    vec_ptr -> elements_no--;
 
     u64 i;
     for(i = target_chunk_index ; i < vec_ptr -> chunk_no && target_chunk -> used_size > 0 ; i++ , target_chunk = vec_ptr -> chunks_ptr[i] , target = target_chunk -> mem_ptr){
@@ -273,6 +272,7 @@ bool c_vector_remove_element(c_vector *vec_ptr , u64 index){
     }
 
     target_chunk -> used_size -= vec_ptr -> obj_rounded_size;
+    vec_ptr -> elements_no--;
 
 
     return true;
@@ -293,6 +293,10 @@ bool c_vector_edit_element(c_vector *vec_ptr , u64 index , void *new_val_ptr){
         return false;
     }
 
+    if(vec_ptr -> free_obj){
+        vec_ptr -> free_obj(copy_object(target , vec_ptr -> obj_actual_size));
+    }
+
     memcpy_s(target , vec_ptr -> obj_actual_size , new_val_ptr , vec_ptr -> obj_actual_size);
 
     return true;
@@ -306,4 +310,20 @@ void *c_vector_get_element(c_vector *vec_ptr , u64 index){
     }
 
     return copy_object(target , vec_ptr -> obj_actual_size);
+}
+
+u64 c_vector_get_elements_no(c_vector *vec_ptr){
+    if(!vec_ptr){
+        return 0;
+    }
+
+    return vec_ptr -> elements_no;
+}
+
+size_t c_vector_get_obj_size(c_vector *vec_ptr){
+    if(!vec_ptr){
+        return 0;
+    }
+
+    return vec_ptr -> obj_actual_size;
 }
