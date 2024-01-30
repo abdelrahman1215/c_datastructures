@@ -136,9 +136,9 @@ void free_hashmap_contents(hashmap *map_ptr){
     map_ptr -> entries = NULL;
 }
 
-void destroy_hashmap(hashmap *map_ptr){
+datastruct_err destroy_hashmap(hashmap *map_ptr){
     if(!map_ptr){
-        return;
+        return Invalid_Input;
     }
 
     if(map_ptr -> entries){
@@ -146,77 +146,92 @@ void destroy_hashmap(hashmap *map_ptr){
     }
 
     free(map_ptr);
+    return Success;
 }
 
-bool hashmap_add_entry(const char *key , void *obj_ptr , size_t obj_size , free_func *free_func_ptr , hashmap *map_ptr){
+entry *create_entry(const char *key , free_func *free_func_ptr , void *obj_ptr , size_t obj_size){
+    if(!key || !obj_ptr || !obj_size){
+        return NULL;
+    }
+
+    if(*key == '\000'){
+        return NULL;
+    }
+
+    entry *ret = (entry *)calloc(1 , sizeof(entry));
+    if(!ret){
+        return NULL;
+    }
+
+    ret -> key_len = strnlen_s(key , UINT32_MAX);
+    ret -> key = copy_object((void *)key , ret -> key_len + 1);
+    if(!ret -> key){
+        free(ret);
+        return NULL;
+    }
+
+    ret -> obj_size = obj_size;
+    ret -> obj_ptr = copy_object(obj_ptr , obj_size);
+    if(!ret -> obj_ptr){
+        free(ret -> key);
+        free(ret);
+        return NULL;
+    }
+
+    ret -> next = NULL;
+
+    if(free_func_ptr == NULL){
+        ret -> free_obj = free;
+    }else{
+        ret -> free_obj = free_func_ptr;
+    }
+
+    return ret;
+}
+
+datastruct_err hashmap_add_entry(const char *key , void *obj_ptr , size_t obj_size , free_func *free_func_ptr , hashmap *map_ptr){
     if(!key[0] || !map_ptr || !obj_ptr || !obj_size){
-        return false;
+        return Invalid_Input;
     }
 
     if(!map_ptr -> entries){
-        return false;
+        return Invalid_Input;
     }
 
     u32 index = map_ptr -> hash_ptr(key , map_ptr -> size);
     size_t key_len = strnlen_s(key , UINT32_MAX);
 
     entry **node_ptr = map_ptr -> entries + index;
+    if(*node_ptr && !map_ptr -> list_of_list){
+        return No_Space;
+    }
+    
     for(entry *curr_node = *node_ptr ; curr_node != NULL && map_ptr -> list_of_list == true ; node_ptr = &curr_node -> next , curr_node = curr_node -> next){
         if(curr_node -> key_len != key_len || curr_node -> key[0] != key[0]){
             continue;
         }
         
         if(!strcmp(curr_node -> key , key)){
-            return false;
+            return Already_Exists;
         }
     }
 
-    if(*node_ptr != NULL){
-        init_hashmap(map_ptr , map_ptr -> size , map_ptr -> hash_ptr , map_ptr -> list_of_list);
-    }
     
-    *node_ptr = (entry *)calloc(1 , sizeof(entry));
-
-    entry *target = *node_ptr;
-    if(!node_ptr){
-        return false;
+    *node_ptr = create_entry(key , free_func_ptr , obj_ptr , obj_size);
+    if(*node_ptr == NULL){
+        return Allocation_err;
     }
 
-    target -> key_len = strnlen_s(key , UINT32_MAX);
-    target -> key = copy_object((void *)key , target -> key_len + 1);/*(char *)calloc(target -> key_len + 1 , 1);
-    strcpy_s(target -> key , target -> key_len + 1 , key);*/
-    if(!target -> key){
-        free(target);
-        return false;
-    }
-
-    target -> obj_size = obj_size;
-    target -> obj_ptr = copy_object(obj_ptr , obj_size);/*calloc(1 , obj_size);
-    memcpy_s(target -> obj_ptr , obj_size , obj_ptr , obj_size);*/
-    if(!target -> obj_ptr){
-        free(target -> key);
-        free(target);
-        return false;
-    }
-
-    target -> next = NULL;
-
-    if(free_func_ptr == NULL){
-        target -> free_obj = free;
-    }else{
-        target -> free_obj = free_func_ptr;
-    }
-
-    return true;
+    return Success;
 }
 
-bool hashmap_delete_entry(const char* key , hashmap *map_ptr){
+datastruct_err hashmap_delete_entry(const char* key , hashmap *map_ptr){
     if(!key[0] || !map_ptr){
-        return false;
+        return Invalid_Input;
     }
 
     if(!map_ptr -> entries){
-        return false;
+        return Invalid_Input;
     }
 
     u32 index = map_ptr -> hash_ptr(key , map_ptr -> size);
@@ -237,7 +252,7 @@ bool hashmap_delete_entry(const char* key , hashmap *map_ptr){
     }
 
     if(node == NULL){
-        return false;
+        return Not_Found;
     }
 
     if(prev){
@@ -249,7 +264,7 @@ bool hashmap_delete_entry(const char* key , hashmap *map_ptr){
     entry *target = node;
     free_entry(target);
 
-    return true;
+    return Success;
 }
 
 entry *hashmap_lookup_entry(const char *key , hashmap *map_ptr){

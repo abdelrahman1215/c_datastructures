@@ -46,9 +46,9 @@ void free_linked_list_contents(linked_list *list_ptr){
     list_ptr -> node_no = 0;
 }
 
-void destroy_linked_list(linked_list *list_ptr){
+datastruct_err destroy_linked_list(linked_list *list_ptr){
     if(!list_ptr){
-        return;
+        return  Invalid_Input;
     }
 
     if(list_ptr -> first_node){
@@ -56,6 +56,7 @@ void destroy_linked_list(linked_list *list_ptr){
     }
 
     free(list_ptr);
+    return Success;
 }
 
 node *linked_list_create_node(void *obj_ptr , size_t obj_size , free_func *free_obj){
@@ -85,14 +86,14 @@ node *linked_list_create_node(void *obj_ptr , size_t obj_size , free_func *free_
     return ret;
 }
 
-bool linked_list_add_node(void *obj_ptr , size_t obj_size , free_func *free_obj , linked_list *list_ptr){
+datastruct_err linked_list_add_node(void *obj_ptr , size_t obj_size , free_func *free_obj , linked_list *list_ptr){
     if(!obj_ptr || !list_ptr || !obj_size){
-        return false;
+        return Invalid_Input;
     }
 
     node *new_node = linked_list_create_node(obj_ptr , obj_size , free_obj);
     if(!new_node){
-        return false;
+        return Allocation_err;
     }
 
     if(!list_ptr -> first_node){
@@ -106,7 +107,7 @@ bool linked_list_add_node(void *obj_ptr , size_t obj_size , free_func *free_obj 
 
     list_ptr -> node_no++;
 
-    return true;
+    return Success;
 }
 
 node *linked_list_get_node(u64 index , linked_list *list_ptr){
@@ -130,13 +131,13 @@ node *linked_list_get_node(u64 index , linked_list *list_ptr){
     return ret;
 }
 
-bool linked_list_delete_node(u64 index , linked_list *list_ptr){
+datastruct_err linked_list_delete_node(u64 index , linked_list *list_ptr){
     if(!list_ptr){
-        return false;
+        return Invalid_Input;
     }
 
     if(index >= list_ptr -> node_no){
-        return false;
+        return Invalid_Input;
     }
 
     node *target = linked_list_get_node(index , list_ptr);
@@ -161,7 +162,7 @@ bool linked_list_delete_node(u64 index , linked_list *list_ptr){
 
     list_ptr -> node_no--;
 
-    return true;
+    return Success;
 }
 
 node *linked_list_get_first_node(linked_list *list_ptr){

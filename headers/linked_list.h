@@ -18,7 +18,7 @@ linked_list *new_linked_list();
 
 /// @brief frees a linked list & its contents
 /// @param list_ptr a pointer to the linked list
-void destroy_linked_list(linked_list *list_ptr);
+datastruct_err destroy_linked_list(linked_list *list_ptr);
 
 //--------------------------------
 
@@ -28,15 +28,13 @@ void destroy_linked_list(linked_list *list_ptr);
 /// @param free_obj the function the will be used to free it (enter NULL for the default stdlib free)
 /// @param list_ptr a pointer to the linked list
 /// @return the status of the operation (true on success and false on failure)
-bool linked_list_add_node(void *obj_ptr , size_t obj_size , free_func *free_obj , linked_list *list_ptr);
-
-//--------------------------------
+datastruct_err linked_list_add_node(void *obj_ptr , size_t obj_size , free_func *free_obj , linked_list *list_ptr);
 
 /// @brief delete a node from a linked list
 /// @param index the index of the node
 /// @param list_ptr a pointer to the list
 /// @return the status of the operation (true on success and false on failure)
-bool linked_list_delete_node(u64 index , linked_list *list_ptr);
+datastruct_err linked_list_delete_node(u64 index , linked_list *list_ptr);
 
 /// @brief get a node from a linked list using its index
 /// @param index the index of the node

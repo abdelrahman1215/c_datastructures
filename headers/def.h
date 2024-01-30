@@ -13,6 +13,8 @@ extern "C"{
 #define true	1
 #define false	0
 
+typedef enum datastruct_err {Success , Allocation_err , Invalid_Input , Not_Found , No_Space , Already_Exists} datastruct_err;
+
 typedef __uint128_t u128;
 typedef uint64_t u64;
 typedef uint32_t u32;

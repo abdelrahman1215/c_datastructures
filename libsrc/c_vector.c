@@ -114,9 +114,9 @@ void free_c_vector_contents(c_vector *vec_ptr){
     vec_ptr -> elements_no = 0;
 }
 
-void destroy_c_vector(c_vector *vec_ptr){
+datastruct_err destroy_c_vector(c_vector *vec_ptr){
     if(!vec_ptr){
-        return;
+        return Invalid_Input;
     }
 
     if(vec_ptr -> chunks_ptr){
@@ -124,16 +124,17 @@ void destroy_c_vector(c_vector *vec_ptr){
     }
 
     free(vec_ptr);
+    return Success;
 }
 
-bool c_vector_add_chunk(c_vector *vec_ptr){
+datastruct_err c_vector_add_chunk(c_vector *vec_ptr){
     if(!vec_ptr){
-        return false;
+        return Invalid_Input;
     }
 
     mem_chunk *new_chunk = allocate_mem_chunk(vec_ptr -> chunk_size);
     if(!new_chunk){
-        return false;
+        return Allocation_err;
     }
 
     mem_chunk **tmp;
@@ -146,7 +147,7 @@ bool c_vector_add_chunk(c_vector *vec_ptr){
     if(!tmp){
         free(new_chunk -> mem_ptr);
         free(new_chunk);
-        return false;
+        return Allocation_err;
     }
 
     vec_ptr -> chunks_ptr = tmp;
@@ -155,18 +156,18 @@ bool c_vector_add_chunk(c_vector *vec_ptr){
 
     vec_ptr -> chunk_no++;
 
-    return true;
+    return Success;
 }
 
-bool c_vector_add_element(c_vector *vec_ptr , void *obj_ptr){
+datastruct_err c_vector_add_element(c_vector *vec_ptr , void *obj_ptr){
     if(!obj_ptr || !vec_ptr){
-        return false;
+        return Invalid_Input;
     }
 
     //allocate a new chunk if the last chunk is full
     if(vec_ptr -> chunks_ptr[vec_ptr -> chunk_no - 1] -> used_size == vec_ptr -> chunk_size){
-        if(!c_vector_add_chunk(vec_ptr)){
-            return false;
+        if(c_vector_add_chunk(vec_ptr) != Success){
+            return Allocation_err;
         }
     }
 
@@ -178,7 +179,7 @@ bool c_vector_add_element(c_vector *vec_ptr , void *obj_ptr){
     target_chunk -> used_size += vec_ptr -> obj_rounded_size;
     vec_ptr -> elements_no++;
 
-    return true;
+    return Success;
 }
 
 void *c_vector_get_element_ptr(c_vector *vec_ptr , u64 index){
@@ -196,13 +197,13 @@ void *c_vector_get_element_ptr(c_vector *vec_ptr , u64 index){
     return (char *)target_chunk -> mem_ptr + ((index % elements_per_chunk) * vec_ptr -> obj_rounded_size);
 }
 
-bool c_vector_remove_last_chunk(c_vector *vec_ptr){
+datastruct_err c_vector_remove_last_chunk(c_vector *vec_ptr){
     if(!vec_ptr){
-        return false;
+        return Invalid_Input;
     }
 
     if(vec_ptr -> chunk_no <= 1){
-        return false;
+        return Invalid_Input;
     }
 
     mem_chunk *target = vec_ptr -> chunks_ptr[vec_ptr -> chunk_no - 1];
@@ -210,7 +211,7 @@ bool c_vector_remove_last_chunk(c_vector *vec_ptr){
     mem_chunk **tmp = (mem_chunk **)realloc(vec_ptr -> chunks_ptr , sizeof(mem_chunk *) * (--vec_ptr -> chunk_no));
 
     if(!tmp){
-        return false;
+        return Allocation_err;
     }
 
     for(char *i = target -> mem_ptr ; vec_ptr -> free_obj && i < (char *)target -> mem_ptr + target -> used_size ; i += vec_ptr -> obj_rounded_size){
@@ -221,16 +222,16 @@ bool c_vector_remove_last_chunk(c_vector *vec_ptr){
 
     vec_ptr -> chunks_ptr = tmp;
 
-    return true;
+    return Success;
 }
 
-bool c_vector_remove_element(c_vector *vec_ptr , u64 index){
+datastruct_err c_vector_remove_element(c_vector *vec_ptr , u64 index){
     if(!vec_ptr){
-        return false;
+        return Invalid_Input;
     }
 
     if(index >= vec_ptr -> elements_no){
-        return false;
+        return Allocation_err;
     }
 
     u32 elements_per_chunk = (vec_ptr -> chunk_size / vec_ptr -> obj_rounded_size);
@@ -240,7 +241,12 @@ bool c_vector_remove_element(c_vector *vec_ptr , u64 index){
     void *target = c_vector_get_element_ptr(vec_ptr , index);
 
     if(vec_ptr -> free_obj){
-        vec_ptr -> free_obj(copy_object(target , vec_ptr -> obj_actual_size));
+        void *copy = copy_object(target , vec_ptr -> obj_actual_size);
+        if(!copy){
+            return Allocation_err;
+        }
+
+        vec_ptr -> free_obj(copy);
     }
 
 
@@ -275,22 +281,22 @@ bool c_vector_remove_element(c_vector *vec_ptr , u64 index){
     vec_ptr -> elements_no--;
 
 
-    return true;
+    return Success;
 }
 
-bool c_vector_edit_element(c_vector *vec_ptr , u64 index , void *new_val_ptr){
+datastruct_err c_vector_edit_element(c_vector *vec_ptr , u64 index , void *new_val_ptr){
     if(!vec_ptr || !new_val_ptr){
-        return false;
+        return Invalid_Input;
     }
 
     if(index >= vec_ptr -> elements_no){
-        return false;
+        return Invalid_Input;
     }
 
     void *target = c_vector_get_element_ptr(vec_ptr , index);
 
     if(!target){
-        return false;
+        return Allocation_err;
     }
 
     if(vec_ptr -> free_obj){
@@ -299,7 +305,7 @@ bool c_vector_edit_element(c_vector *vec_ptr , u64 index , void *new_val_ptr){
 
     memcpy_s(target , vec_ptr -> obj_actual_size , new_val_ptr , vec_ptr -> obj_actual_size);
 
-    return true;
+    return Success;
 }
 
 void *c_vector_get_element(c_vector *vec_ptr , u64 index){

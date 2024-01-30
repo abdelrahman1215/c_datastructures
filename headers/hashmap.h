@@ -23,7 +23,7 @@ hashmap *new_hashmap(size_t size , hash_func *hash_ptr , bool list_of_list);
 
 /// @brief frees a hashmap & its contents
 /// @param map_ptr a pointer to the hashmap
-void destroy_hashmap(hashmap *map_ptr);
+datastruct_err destroy_hashmap(hashmap *map_ptr);
 
 //--------------------------------
 
@@ -34,13 +34,13 @@ void destroy_hashmap(hashmap *map_ptr);
 /// @param free_func_ptr a pointer to the function that will be used to free the object (set to NULL for the default stdlib free)
 /// @param map_ptr a pointer to the map
 /// @return returns the status of the operation (true in the case of succes & false in the case of failure)
-bool hashmap_add_entry(const char *key , void *obj_ptr , size_t obj_size , free_func *free_func_ptr , hashmap *map_ptr);
+datastruct_err hashmap_add_entry(const char *key , void *obj_ptr , size_t obj_size , free_func *free_func_ptr , hashmap *map_ptr);
 
 /// @brief delete an entry from a hashmap
 /// @param key the key of the entry
 /// @param map_ptr a pointer to the hashmap
 /// @return returns the status of the operation (true in the case of succes & false in the case of failure)
-bool hashmap_delete_entry(const char* key , hashmap *map_ptr);
+datastruct_err hashmap_delete_entry(const char* key , hashmap *map_ptr);
 
 //--------------------------------
 
