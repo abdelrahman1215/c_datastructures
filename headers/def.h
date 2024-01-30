@@ -26,6 +26,11 @@ typedef int8_t i8;
 typedef char* str;
 typedef void(free_func) (void * obj_ptr);
 
+#define KB 1024
+#define MB 1024 * KB
+#define GB 1024 * MB
+#define TB 1024 * GB
+
 #ifdef __cplusplus
 }
 #endif
