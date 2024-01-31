@@ -214,7 +214,7 @@ datastruct_err c_vector_remove_last_chunk(c_vector *vec_ptr){
         return Allocation_err;
     }
 
-    for(char *i = target -> mem_ptr ; vec_ptr -> free_obj && i < (char *)target -> mem_ptr + target -> used_size ; i += vec_ptr -> obj_rounded_size){
+    for(char *i = (char *)target -> mem_ptr ; vec_ptr -> free_obj && i < (char *)target -> mem_ptr + target -> used_size ; i += vec_ptr -> obj_rounded_size){
         vec_ptr -> free_obj(copy_object(i , vec_ptr -> obj_actual_size));
     }
 
@@ -253,9 +253,9 @@ datastruct_err c_vector_remove_element(c_vector *vec_ptr , u64 index){
     u64 i;
     for(i = target_chunk_index ; i < vec_ptr -> chunk_no && target_chunk -> used_size > 0 ; i++ , target_chunk = vec_ptr -> chunks_ptr[i] , target = target_chunk -> mem_ptr){
 
-        size_t size_to_copy = (size_t)(char *)(  target_chunk -> mem_ptr
+        size_t size_to_copy = (size_t)(char *)((char *)target_chunk -> mem_ptr
         /*                                   */+ target_chunk -> used_size
-        /*                                   */- target)
+        /*                                   */- (char *)target)
         /*                                   */- vec_ptr -> obj_rounded_size;
 
         if(size_to_copy > 0){
