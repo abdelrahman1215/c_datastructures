@@ -1,6 +1,23 @@
 test:
 	gcc -Wall -g3 -o test.exe test.c -Lbin -lhashmap -llinked_list -lc_vector
 
+map_test:
+	make hashmap
+	gcc -Wall -g3 -o HashMapTest.exe tests/HashMapTest.c -Lbin -lhashmap
+
+list_test:
+	make linked_list
+	gcc -Wall -g3 -o LinkedListTest.exe tests/LinkedListTest.c -Lbin -llinked_list
+
+vec_test:
+	make c_vector
+	gcc -Wall -g3 -o C_vectorTest.exe tests/C_vectorTest.c -Lbin -lc_vector
+
+data_tests:
+	make map_test
+	make list_test
+	make vec_test
+
 hashmap:
 	gcc -c libsrc/hashmap.c -o bin/hashmap.o
 	ar rcs bin/libhashmap.a bin/hashmap.o
