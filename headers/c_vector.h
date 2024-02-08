@@ -8,7 +8,6 @@ extern "C"{
 #include "def.h"
 
 #define CHUNK_SIZE 4 * KB
-#define MAX_OBJECT_SIZE 16
 typedef struct memory_chunk mem_chunk;
 typedef struct c_vector c_vector;
 

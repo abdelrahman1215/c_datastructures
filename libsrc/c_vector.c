@@ -56,7 +56,7 @@ mem_chunk *allocate_mem_chunk(size_t chunk_size){
 }
 
 c_vector *new_c_vector(size_t obj_size , free_func free_obj){
-    if(obj_size == 0 || obj_size > MAX_OBJECT_SIZE){
+    if(obj_size == 0 || obj_size > CHUNK_SIZE / 16){
         return NULL;
     }
 
