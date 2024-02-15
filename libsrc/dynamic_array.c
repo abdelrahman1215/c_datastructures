@@ -1,6 +1,6 @@
 #include "mem.c"
 #include <stdlib.h>
-#include "../headers/c_vector.h"
+#include "../headers/dynamic_array.h"
 
 struct memory_chunk{
     size_t actual_size;
@@ -8,7 +8,7 @@ struct memory_chunk{
     void *mem_ptr;
 };
 
-struct c_vector {
+struct dynamic_array {
     size_t chunk_size;
 
     u64 elements_no;
@@ -55,12 +55,12 @@ mem_chunk *allocate_mem_chunk(size_t chunk_size){
     return ret;
 }
 
-c_vector *new_c_vector(size_t obj_size , free_func free_obj){
+dynamic_array *new_dynamic_array(size_t obj_size , free_func free_obj){
     if(obj_size == 0 || obj_size > CHUNK_SIZE / 16){
         return NULL;
     }
 
-    c_vector *ret = (c_vector *)calloc(1 , sizeof(c_vector));
+    dynamic_array *ret = (dynamic_array *)calloc(1 , sizeof(dynamic_array));
     if(!ret){
         return NULL;
     }
@@ -87,7 +87,7 @@ c_vector *new_c_vector(size_t obj_size , free_func free_obj){
     return ret;
 }
 
-void free_c_vector_contents(c_vector *vec_ptr){
+void free_dynamic_array_contents(dynamic_array *vec_ptr){
     if(!vec_ptr){
         return;
     }
@@ -114,20 +114,20 @@ void free_c_vector_contents(c_vector *vec_ptr){
     vec_ptr -> elements_no = 0;
 }
 
-datastruct_err destroy_c_vector(c_vector *vec_ptr){
+datastruct_err destroy_dynamic_array(dynamic_array *vec_ptr){
     if(!vec_ptr){
         return Invalid_Input;
     }
 
     if(vec_ptr -> chunks_ptr){
-        free_c_vector_contents(vec_ptr);
+        free_dynamic_array_contents(vec_ptr);
     }
 
     free(vec_ptr);
     return Success;
 }
 
-datastruct_err c_vector_add_chunk(c_vector *vec_ptr){
+datastruct_err dynamic_array_add_chunk(dynamic_array *vec_ptr){
     if(!vec_ptr){
         return Invalid_Input;
     }
@@ -159,14 +159,14 @@ datastruct_err c_vector_add_chunk(c_vector *vec_ptr){
     return Success;
 }
 
-datastruct_err c_vector_add_element(c_vector *vec_ptr , void *obj_ptr){
+datastruct_err dynamic_array_add_element(dynamic_array *vec_ptr , void *obj_ptr){
     if(!obj_ptr || !vec_ptr){
         return Invalid_Input;
     }
 
     //allocate a new chunk if the last chunk is full
     if(vec_ptr -> chunks_ptr[vec_ptr -> chunk_no - 1] -> used_size == vec_ptr -> chunk_size){
-        if(c_vector_add_chunk(vec_ptr) != Success){
+        if(dynamic_array_add_chunk(vec_ptr) != Success){
             return Allocation_err;
         }
     }
@@ -182,7 +182,7 @@ datastruct_err c_vector_add_element(c_vector *vec_ptr , void *obj_ptr){
     return Success;
 }
 
-void *c_vector_get_element_ptr(c_vector *vec_ptr , u64 index){
+void *dynamic_array_get_element_ptr(dynamic_array *vec_ptr , u64 index){
     if(!vec_ptr){
         return NULL;
     }
@@ -197,7 +197,7 @@ void *c_vector_get_element_ptr(c_vector *vec_ptr , u64 index){
     return (char *)target_chunk -> mem_ptr + ((index % elements_per_chunk) * vec_ptr -> obj_rounded_size);
 }
 
-datastruct_err c_vector_remove_last_chunk(c_vector *vec_ptr){
+datastruct_err dynamic_array_remove_last_chunk(dynamic_array *vec_ptr){
     if(!vec_ptr){
         return Invalid_Input;
     }
@@ -225,7 +225,7 @@ datastruct_err c_vector_remove_last_chunk(c_vector *vec_ptr){
     return Success;
 }
 
-datastruct_err c_vector_remove_element(c_vector *vec_ptr , u64 index){
+datastruct_err dynamic_array_remove_element(dynamic_array *vec_ptr , u64 index){
     if(!vec_ptr){
         return Invalid_Input;
     }
@@ -238,7 +238,7 @@ datastruct_err c_vector_remove_element(c_vector *vec_ptr , u64 index){
     u64 target_chunk_index = index / elements_per_chunk;
     mem_chunk *target_chunk = vec_ptr -> chunks_ptr[target_chunk_index];
 
-    void *target = c_vector_get_element_ptr(vec_ptr , index);
+    void *target = dynamic_array_get_element_ptr(vec_ptr , index);
 
     if(vec_ptr -> free_obj){
         void *copy = copy_object(target , vec_ptr -> obj_actual_size);
@@ -273,7 +273,7 @@ datastruct_err c_vector_remove_element(c_vector *vec_ptr , u64 index){
     if(i > 0 && target_chunk -> used_size == 0){
         target_chunk = vec_ptr -> chunks_ptr[i - 1];
         if(vec_ptr -> chunk_no > 1 && i < vec_ptr -> chunk_no - 1){
-            c_vector_remove_last_chunk(vec_ptr);
+            dynamic_array_remove_last_chunk(vec_ptr);
         }
     }
 
@@ -284,7 +284,7 @@ datastruct_err c_vector_remove_element(c_vector *vec_ptr , u64 index){
     return Success;
 }
 
-datastruct_err c_vector_edit_element(c_vector *vec_ptr , u64 index , void *new_val_ptr){
+datastruct_err dynamic_array_edit_element(dynamic_array *vec_ptr , u64 index , void *new_val_ptr){
     if(!vec_ptr || !new_val_ptr){
         return Invalid_Input;
     }
@@ -293,7 +293,7 @@ datastruct_err c_vector_edit_element(c_vector *vec_ptr , u64 index , void *new_v
         return Invalid_Input;
     }
 
-    void *target = c_vector_get_element_ptr(vec_ptr , index);
+    void *target = dynamic_array_get_element_ptr(vec_ptr , index);
 
     if(!target){
         return Allocation_err;
@@ -308,8 +308,8 @@ datastruct_err c_vector_edit_element(c_vector *vec_ptr , u64 index , void *new_v
     return Success;
 }
 
-void *c_vector_get_element(c_vector *vec_ptr , u64 index){
-    void *target = c_vector_get_element_ptr(vec_ptr , index);
+void *dynamic_array_get_element(dynamic_array *vec_ptr , u64 index){
+    void *target = dynamic_array_get_element_ptr(vec_ptr , index);
 
     if(!target){
         return NULL;
@@ -318,7 +318,7 @@ void *c_vector_get_element(c_vector *vec_ptr , u64 index){
     return copy_object(target , vec_ptr -> obj_actual_size);
 }
 
-u64 c_vector_get_elements_no(c_vector *vec_ptr){
+u64 dynamic_array_get_elements_no(dynamic_array *vec_ptr){
     if(!vec_ptr){
         return 0;
     }
@@ -326,7 +326,7 @@ u64 c_vector_get_elements_no(c_vector *vec_ptr){
     return vec_ptr -> elements_no;
 }
 
-size_t c_vector_get_obj_size(c_vector *vec_ptr){
+size_t dynamic_array_get_obj_size(dynamic_array *vec_ptr){
     if(!vec_ptr){
         return 0;
     }

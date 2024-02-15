@@ -9,14 +9,14 @@ list_test:
 	make linked_list
 	gcc -Wall -g3 -o LinkedListTest.exe tests/LinkedListTest.c -Lbin -llinked_list
 
-vec_test:
-	make c_vector
-	gcc -Wall -g3 -o C_vectorTest.exe tests/C_vectorTest.c -Lbin -lc_vector
+dynamic_array_test:
+	make dynamic_array
+	gcc -Wall -g3 -o DynamicArrayTest.exe tests/DynamicArrayTest.c -Lbin -ldynamic_array
 
 data_tests:
 	make map_test
 	make list_test
-	make vec_test
+	make dynamic_array_test
 
 hashmap:
 	gcc -c libsrc/hashmap.c -o bin/hashmap.o
@@ -28,12 +28,12 @@ linked_list:
 	ar rcs bin/liblinked_list.a bin/linked_list.o
 	del bin\linked_list.o
 
-c_vector:
-	gcc -c libsrc/c_vector.c -o bin/c_vector.o
-	ar rcs bin/libc_vector.a bin/c_vector.o
-	del bin\c_vector.o
+dynamic_array:
+	gcc -c libsrc/dynamic_array.c -o bin/dynamic_array.o
+	ar rcs bin/libdynamic_array.a bin/dynamic_array.o
+	del bin\dynamic_array.o
 
 libs:
 	make hashmap
 	make linked_list
-	make c_vector
+	make dynamic_array

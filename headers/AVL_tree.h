@@ -259,7 +259,7 @@ static void balance_tree(AVL_tree *tree_ptr){
     }
 
     AVL_node *target;
-    for(target = tree_ptr -> root ; target -> left_node != NULL || target -> right_node != NULL;){
+    for(target = tree_ptr -> root ;target != NULL && (target -> left_node != NULL || target -> right_node != NULL);){
         balance = get_AVL_tree_balance(target);
         if(balance >= -1 && balance <= 1){
             target = target -> prev_node;
@@ -273,8 +273,10 @@ static void balance_tree(AVL_tree *tree_ptr){
         }
     }
 
-    for(AVL_node *node_ptr = target , *tmp = node_ptr -> prev_node; node_ptr != NULL ; node_ptr = tmp){
+    AVL_node *tmp;
+    for(AVL_node *node_ptr = target ; node_ptr != NULL ; node_ptr = tmp){
         balance = get_AVL_tree_balance(node_ptr);
+        tmp = node_ptr -> prev_node;
         if(balance >= -1 && balance <= 1){
             break;
         }
