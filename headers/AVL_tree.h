@@ -185,10 +185,10 @@ static void AVL_tree_right_rotation(AVL_node *subtree_ptr , AVL_tree *tree_ptr){
         tree_ptr -> root = left;
     }
 
-    subtree_ptr -> height = max_height(subtree_ptr -> left_node , subtree_ptr -> right_node) + 1;
-    left -> height = max_height(left -> left_node , left -> right_node) + 1;
-    if(subtree_prev != NULL){
-        subtree_prev -> height = max_height(subtree_prev -> left_node , subtree_prev -> right_node);
+    i64 height;
+    for(AVL_node *node_ptr = subtree_ptr ; node_ptr != NULL ; node_ptr = node_ptr -> prev_node){
+        height = max_height(node_ptr -> left_node , node_ptr -> right_node) + 1;
+        node_ptr -> height = height;
     }
 }
 
@@ -226,10 +226,10 @@ static void AVL_tree_left_rotation(AVL_node *subtree_ptr , AVL_tree *tree_ptr){
         tree_ptr -> root = right;
     }
 
-    subtree_ptr -> height = max_height(subtree_ptr -> left_node , subtree_ptr -> right_node) + 1;
-    right -> height = max_height(right -> left_node , right -> right_node) + 1;
-    if(subtree_prev != NULL){
-        subtree_prev -> height = max_height(subtree_prev -> left_node , subtree_prev -> right_node);
+    i64 height;
+    for(AVL_node *node_ptr = subtree_ptr ; node_ptr != NULL ; node_ptr = node_ptr -> prev_node){
+        height = max_height(node_ptr -> left_node , node_ptr -> right_node) + 1;
+        node_ptr -> height = height;
     }
 }
 
