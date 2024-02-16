@@ -6,13 +6,11 @@ extern "C"{
 #endif
 
 //todo :
-//delete function
-//lookup nearest function
-//get node_no function
 //divide into .c and .h files
 //write function deoxygen docs
 //write makescript
 //write test
+//write test_script
 
 #include "def.h"
 #include "../libsrc/mem.c"
@@ -73,13 +71,22 @@ AVL_tree *new_AVL_tree(size_t obj_size , free_func free_obj){
     return ret;
 }
 
-static void free_tree(AVL_node *node_ptr , free_func *free_obj){
+static void free_AVL_node(AVL_node *node_ptr , free_func *free_obj){
+    if(!node_ptr || !node_ptr){
+        return;
+    }
+
+    free_obj(node_ptr -> obj_ptr);
+    free(node_ptr);
+}
+
+static void free_AVL_tree(AVL_node *node_ptr , free_func *free_obj){
     if(!node_ptr || !free_obj){
         return;
     }
 
-    free_tree(node_ptr -> right_node , free_obj);
-    free_tree(node_ptr -> left_node , free_obj);
+    free_AVL_tree(node_ptr -> right_node , free_obj);
+    free_AVL_tree(node_ptr -> left_node , free_obj);
 
     free_obj(node_ptr -> obj_ptr);
     free(node_ptr);
@@ -90,7 +97,7 @@ datastruct_err destroy_AVL_tree(AVL_tree *tree_ptr){
         return Invalid_Input;
     }
 
-    free_tree(tree_ptr -> root , tree_ptr -> free_obj);
+    free_AVL_tree(tree_ptr -> root , tree_ptr -> free_obj);
     free(tree_ptr);
     return Success;
 }
@@ -275,12 +282,12 @@ static void balance_tree(AVL_tree *tree_ptr){
 
     AVL_node *tmp;
     for(AVL_node *node_ptr = target ; node_ptr != NULL ; node_ptr = tmp){
-        balance = get_AVL_tree_balance(node_ptr);
-        tmp = node_ptr -> prev_node;
+        balance = get_AVL_tree_balance(tree_ptr ->root);
         if(balance >= -1 && balance <= 1){
             break;
         }
 
+        tmp = node_ptr -> prev_node;
         balance_subtree(node_ptr , tree_ptr);
     }
 }
@@ -348,7 +355,40 @@ datastruct_err AVL_tree_add_node(AVL_tree *tree_ptr , void *obj_ptr){
     return Success;
 }
 
-static void *AVL_tree_lookup_node_by_value(AVL_tree *tree_ptr , void *val_ptr){
+static void *AVL_tree_lookup_nearest_value(AVL_tree *tree_ptr , void *val_ptr){
+    if(!tree_ptr || !val_ptr){
+        return NULL;
+    }
+
+    i64 diff;
+    AVL_node *node_ptr;
+    for(node_ptr = tree_ptr -> root ; node_ptr != NULL ;){
+        diff = memcmp(val_ptr , node_ptr -> obj_ptr , tree_ptr -> obj_size);
+
+        //if the difference is zero return the node
+        //if the difference is negtive then the added object is less than the object stored in the current node
+        //if the difference is positive then the added object is more than the object stored in the current node
+        if(diff == 0){
+            break;
+        }
+
+        if(diff > 0){
+            if(node_ptr -> right_node == NULL){
+                break;
+            }
+            node_ptr = node_ptr -> right_node;
+        } else if(diff < 0){
+            if(node_ptr -> left_node == NULL){
+                break;
+            }
+            node_ptr =  node_ptr -> left_node;
+        }
+    }
+
+    return node_ptr != NULL ? node_ptr -> obj_ptr : NULL;
+}
+
+static AVL_node *AVL_tree_lookup_node_by_value(AVL_tree *tree_ptr , void *val_ptr){
     if(!tree_ptr || !val_ptr){
         return NULL;
     }
@@ -380,16 +420,79 @@ static void *AVL_tree_lookup_node_by_value(AVL_tree *tree_ptr , void *val_ptr){
     return NULL;
 }
 
-//datastruct_err AVL_tree_delete_node(AVL_tree *tree_ptr , void *val_ptr){
-// wirte this function
-//}
+datastruct_err AVL_tree_delete_node(AVL_tree *tree_ptr , void *val_ptr){
+    if(!tree_ptr || !val_ptr){
+        return Invalid_Input;
+    }
+
+    if(!tree_ptr -> root){
+        return Invalid_Input;
+    }
+
+    AVL_node *target = AVL_tree_lookup_node_by_value(tree_ptr , val_ptr);
+    if(!target){
+        return Not_Found;
+    }
+
+    AVL_node *replace = NULL;
+    if(target -> right_node != NULL){
+        for(replace = target -> right_node ; replace -> right_node != NULL ; replace = replace -> right_node){}
+        replace -> prev_node -> right_node = NULL;
+
+        if(replace -> left_node != NULL){
+            replace -> prev_node -> right_node = replace -> left_node;
+            replace -> left_node -> prev_node = replace -> left_node;
+            replace -> left_node = NULL;
+        }
+
+    }else if(target -> left_node != NULL){
+        for(replace = target -> left_node ; replace -> left_node != NULL ; replace = replace -> left_node){}
+
+        replace -> prev_node -> left_node = NULL;
+
+        if(replace -> right_node != NULL){
+            replace -> prev_node -> left_node = replace -> left_node;
+            replace -> right_node -> prev_node = replace -> prev_node;
+            replace -> right_node = NULL;
+        }
+
+    }
+
+    if(replace == NULL){
+        if(target -> prev_node -> right_node == target){
+            target -> prev_node -> right_node = NULL;
+        }else{
+            target -> prev_node -> left_node = NULL;
+        }
+
+        free_AVL_node(target , tree_ptr -> free_obj);
+    }else{
+        for(AVL_node *node_ptr = replace -> prev_node ; node_ptr != NULL ; node_ptr = node_ptr -> prev_node){
+            node_ptr -> height = max_height(node_ptr -> left_node , node_ptr -> right_node);
+        }
+
+        tree_ptr -> free_obj(target -> obj_ptr);
+        target -> obj_ptr = replace -> obj_ptr;
+        free(replace);
+    }
+
+    return Success;
+}
 
 datastruct_err AVL_tree_lookup_value(AVL_tree *tree_ptr , void *val_ptr){
     if(!tree_ptr || !val_ptr){
         return Invalid_Input;
     }
 
-    return AVL_tree_lookup_node_by_value(tree_ptr , val_ptr) != NULL ? Success : Not_Found;
+    return AVL_tree_lookup_node_by_value(tree_ptr , val_ptr) != NULL ? Found : Not_Found;
+}
+
+u32 AVL_tree_get_node_no(AVL_tree *tree_ptr){
+    if(!tree_ptr){
+        return 0;
+    }
+
+    return tree_ptr -> node_no;
 }
 
 #ifdef __cplusplus
