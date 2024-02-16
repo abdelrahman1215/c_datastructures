@@ -28,6 +28,8 @@ typedef struct AVL_node {
 }AVL_node;
 
 typedef struct AVL_tree {
+    AVL_node *last_edited_node;
+
     size_t obj_size;
     free_func *free_obj;
 
@@ -88,8 +90,7 @@ static void free_AVL_tree(AVL_node *node_ptr , free_func *free_obj){
     free_AVL_tree(node_ptr -> right_node , free_obj);
     free_AVL_tree(node_ptr -> left_node , free_obj);
 
-    free_obj(node_ptr -> obj_ptr);
-    free(node_ptr);
+    free_AVL_node(node_ptr , free_obj);
 }
 
 datastruct_err destroy_AVL_tree(AVL_tree *tree_ptr){
@@ -118,6 +119,10 @@ static AVL_node *AVL_tree_create_node(void *obj_ptr , size_t obj_size){
 }
 
 static i64 get_AVL_tree_balance(AVL_node *subtree_ptr){
+    if(!subtree_ptr){
+        return 0;
+    }
+
     i64 left_sub_tree_height = -1;
     if(subtree_ptr -> left_node != NULL){
         left_sub_tree_height = subtree_ptr -> left_node -> height;
@@ -234,10 +239,6 @@ static void balance_subtree(AVL_node *subtree_ptr , AVL_tree *tree_ptr){
     }
 
     i64 balance = get_AVL_tree_balance(subtree_ptr);
-    if(balance >= -1 && balance <= 1){
-        return;
-    }
-
     if(balance < -1){//right heavy
         if(subtree_ptr -> right_node -> right_node == NULL){//the heaviness is caused by the right-left grandchild
             AVL_tree_right_rotation(subtree_ptr -> right_node , tree_ptr);
@@ -260,36 +261,12 @@ static void balance_tree(AVL_tree *tree_ptr){
         return;
     }
 
-    i64 balance = get_AVL_tree_balance(tree_ptr -> root);
-    if(balance >= -1 && balance <= 1){
-        return;
-    }
-
-    AVL_node *target;
-    for(target = tree_ptr -> root ;target != NULL && (target -> left_node != NULL || target -> right_node != NULL);){
-        balance = get_AVL_tree_balance(target);
-        if(balance >= -1 && balance <= 1){
-            target = target -> prev_node;
-            break;
-        }
-
-        if(balance < -1){//right heavy
-            target = target -> right_node;
-        }else if(balance > 1){//left heavy
-            target = target -> left_node;
-        }
-    }
-
-    AVL_node *tmp;
-    for(AVL_node *node_ptr = target ; node_ptr != NULL ; node_ptr = tmp){
-        balance = get_AVL_tree_balance(tree_ptr ->root);
-        if(balance >= -1 && balance <= 1){
-            break;
-        }
-
+    for(AVL_node *node_ptr = tree_ptr -> last_edited_node , *tmp ; node_ptr != NULL ; node_ptr = tmp){
         tmp = node_ptr -> prev_node;
         balance_subtree(node_ptr , tree_ptr);
     }
+
+    tree_ptr -> last_edited_node = NULL;
 }
 
 datastruct_err AVL_tree_add_node(AVL_tree *tree_ptr , void *obj_ptr){
@@ -302,6 +279,7 @@ datastruct_err AVL_tree_add_node(AVL_tree *tree_ptr , void *obj_ptr){
         return Allocation_err;
     }
 
+    tree_ptr -> last_edited_node = new_node;
     if(tree_ptr -> root == NULL){
         tree_ptr -> root = new_node;
         return Success;
@@ -347,15 +325,12 @@ datastruct_err AVL_tree_add_node(AVL_tree *tree_ptr , void *obj_ptr){
         }
     }
 
-    i64 balance = get_AVL_tree_balance(tree_ptr -> root);
-    if(balance < -1 || balance > 1){
-        balance_tree(tree_ptr);
-    }
+    balance_tree(tree_ptr);
 
     return Success;
 }
 
-static void *AVL_tree_lookup_nearest_value(AVL_tree *tree_ptr , void *val_ptr){
+void *AVL_tree_lookup_nearest_value(AVL_tree *tree_ptr , void *val_ptr){
     if(!tree_ptr || !val_ptr){
         return NULL;
     }
@@ -434,48 +409,33 @@ datastruct_err AVL_tree_delete_node(AVL_tree *tree_ptr , void *val_ptr){
         return Not_Found;
     }
 
-    AVL_node *replace = NULL;
-    if(target -> right_node != NULL){
-        for(replace = target -> right_node ; replace -> right_node != NULL ; replace = replace -> right_node){}
-        replace -> prev_node -> right_node = NULL;
-
-        if(replace -> left_node != NULL){
-            replace -> prev_node -> right_node = replace -> left_node;
-            replace -> left_node -> prev_node = replace -> left_node;
-            replace -> left_node = NULL;
-        }
-
-    }else if(target -> left_node != NULL){
-        for(replace = target -> left_node ; replace -> left_node != NULL ; replace = replace -> left_node){}
-
-        replace -> prev_node -> left_node = NULL;
-
-        if(replace -> right_node != NULL){
-            replace -> prev_node -> left_node = replace -> left_node;
-            replace -> right_node -> prev_node = replace -> prev_node;
-            replace -> right_node = NULL;
-        }
-
-    }
-
-    if(replace == NULL){
-        if(target -> prev_node -> right_node == target){
-            target -> prev_node -> right_node = NULL;
-        }else{
-            target -> prev_node -> left_node = NULL;
-        }
-
+    if(!target -> left_node && !target -> right_node){
         free_AVL_node(target , tree_ptr -> free_obj);
-    }else{
-        for(AVL_node *node_ptr = replace -> prev_node ; node_ptr != NULL ; node_ptr = node_ptr -> prev_node){
-            node_ptr -> height = max_height(node_ptr -> left_node , node_ptr -> right_node);
-        }
-
-        tree_ptr -> free_obj(target -> obj_ptr);
-        target -> obj_ptr = replace -> obj_ptr;
-        free(replace);
+        return Success;
     }
 
+    AVL_node *succesor = NULL;
+    if(!target -> left_node){
+        succesor = target -> right_node;
+    }else if(!target -> right_node){
+        succesor = target -> left_node;
+    }
+
+    succesor -> prev_node = target -> prev_node;
+    if(target -> prev_node != NULL){
+        
+    }
+    
+    
+    else {
+        if(target -> right_node -> height < target -> left_node -> height){
+            succesor = target -> right_node;
+        }else{
+            succesor = target -> left_node;
+        }
+    }
+
+    
     return Success;
 }
 

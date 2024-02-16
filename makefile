@@ -1,5 +1,5 @@
 test:
-	gcc -Wall -g3 -o test.exe test.c -Lbin -lhashmap -llinked_list -lc_vector
+	gcc -Wall -g3 -o test.exe test.c -Lbin -lhashmap -llinked_list -ldynamic_array
 
 map_test:
 	make hashmap
