@@ -1,5 +1,5 @@
 test:
-	gcc -Wall -g3 -o test.exe test.c -Lbin -lhashmap -llinked_list -ldynamic_array
+	gcc -Wall -g3 -o test.exe test.c -Lbin -lhashmap -llinked_list -ldynamic_array -lAVL_tree
 
 map_test:
 	make hashmap
@@ -17,6 +17,11 @@ data_tests:
 	make map_test
 	make list_test
 	make dynamic_array_test
+
+AVL_tree:
+	gcc -c libsrc/AVL_tree.c -o bin/AVL_tree.o
+	ar rcs bin/libAVL_tree.a bin/AVL_tree.o
+	del bin\AVL_tree.o
 
 hashmap:
 	gcc -c libsrc/hashmap.c -o bin/hashmap.o
@@ -37,3 +42,4 @@ libs:
 	make hashmap
 	make linked_list
 	make dynamic_array
+	make AVL_tree
