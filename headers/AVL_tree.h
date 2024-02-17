@@ -24,7 +24,7 @@ typedef struct AVL_node {
 
     u32 height;
 
-    int *obj_ptr;
+    void *obj_ptr;
 }AVL_node;
 
 typedef struct AVL_tree {
@@ -409,32 +409,56 @@ datastruct_err AVL_tree_delete_node(AVL_tree *tree_ptr , void *val_ptr){
         return Not_Found;
     }
 
-    if(!target -> left_node && !target -> right_node){
+    if(target == tree_ptr -> last_edited_node){
+        tree_ptr -> last_edited_node = target -> prev_node;
+    }
+
+    if(target -> left_node == NULL && target -> right_node == NULL){
+        if(target -> prev_node != NULL){
+            if(target -> prev_node -> left_node == target){
+                target -> prev_node -> left_node = NULL;
+            }else{
+                target -> prev_node -> right_node = NULL;
+            }
+
+            target -> prev_node -> height = max_height(target -> prev_node -> left_node , target -> prev_node -> right_node);
+        }else{//root
+            tree_ptr -> root = NULL;
+        }
         free_AVL_node(target , tree_ptr -> free_obj);
         return Success;
     }
 
     AVL_node *succesor = NULL;
-    if(!target -> left_node){
-        succesor = target -> right_node;
-    }else if(!target -> right_node){
-        succesor = target -> left_node;
-    }
 
-    succesor -> prev_node = target -> prev_node;
-    if(target -> prev_node != NULL){
-        
-    }
-    
-    
-    else {
-        if(target -> right_node -> height < target -> left_node -> height){
-            succesor = target -> right_node;
+    //finding the succesor node
+    if(target -> left_node != NULL && target -> right_node != NULL){//if the node has both nodes used it will go left then to the end of right
+        for(succesor = target -> left_node ; succesor -> right_node != NULL ; succesor = succesor -> right_node){}
+        if(succesor == target -> left_node){//if the succesor is the left node then it has no right daughters
+            target -> left_node = succesor -> left_node;
         }else{
-            succesor = target -> left_node;
+            succesor -> prev_node -> right_node = succesor -> left_node;
         }
     }
 
+    else if(target -> left_node != NULL){//if only the right node is used it is the succesor
+        succesor = target -> left_node;
+        target -> left_node = NULL;
+    }
+
+    else {//if only the left node is used it is the succesor
+        succesor = target -> right_node;
+        target -> right_node = NULL;
+    }
+
+    AVL_node *succesor_prev = succesor -> prev_node;
+    succesor -> prev_node = NULL;
+
+    target -> obj_ptr = succesor -> obj_ptr;
+
+    tree_ptr -> last_edited_node = succesor_prev;
+
+    balance_tree(tree_ptr);
     
     return Success;
 }
