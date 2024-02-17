@@ -12,13 +12,14 @@ typedef struct memory_chunk mem_chunk;
 typedef struct dynamic_array dynamic_array;
 
 /// @brief makes a new dynamic_array
-/// @param obj_size the size of the objects that will be stored in the vector
-/// @param free_obj_contents the function that will be used to free the object (enter NULL for stdlib free)
+/// @param obj_size the size of the objects that will be stored in the dynamic array
+/// @param free_obj the function that will be used to free the object (enter NULL for stdlib free)
 /// @return a pointer to the new dynamic_array
-dynamic_array *new_dynamic_array(size_t obj_size , free_func free_obj_contents);
+dynamic_array *new_dynamic_array(size_t obj_size , free_func free_obj);
 
 /// @brief destroys a dynamic_array
 /// @param vec_ptr a pointer to the dynamic_array
+/// @return the status of the operation
 datastruct_err destroy_dynamic_array(dynamic_array *vec_ptr);
 
 //--------------------------------
