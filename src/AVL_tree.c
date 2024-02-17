@@ -1,5 +1,5 @@
 #include "../headers/AVL_tree.h"
-#include "../libsrc/mem.c"
+#include "mem.c"
 #include <stdlib.h>
 
 struct AVL_node {
