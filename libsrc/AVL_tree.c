@@ -267,6 +267,7 @@ datastruct_err AVL_tree_add_node(AVL_tree *tree_ptr , void *obj_ptr){
     }
 
     tree_ptr -> last_edited_node = new_node;
+    tree_ptr -> node_no++;
     if(tree_ptr -> root == NULL){
         tree_ptr -> root = new_node;
         return Success;
@@ -399,6 +400,8 @@ datastruct_err AVL_tree_delete_node(AVL_tree *tree_ptr , void *val_ptr){
     if(target == tree_ptr -> last_edited_node){
         tree_ptr -> last_edited_node = target -> prev_node;
     }
+
+    tree_ptr -> node_no--;
 
     if(target -> left_node == NULL && target -> right_node == NULL){
         if(target -> prev_node != NULL){
