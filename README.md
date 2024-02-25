@@ -1,7 +1,7 @@
-a simple implimentation of some known data structures in c
+a c implimentation of some of the most used data structures
 
 implemented datastructures (till now) :
 * hashmaps
 * linked list
-* dynamic array
+* dynamic arrays
 * AVL_tree
