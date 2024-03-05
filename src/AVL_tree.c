@@ -22,16 +22,6 @@ struct AVL_tree {
     u32 node_no;
 };
 
-
-
-static i128 min(i128 num1 , i128 num2){
-    if(num1 > num2){
-        return num2;
-    }
-
-    return num1;
-}
-
 static i128 max(i128 num1 , i128 num2){
     if(num1 > num2){
         return num1;
