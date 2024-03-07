@@ -6,6 +6,7 @@ extern "C"{
 #endif
 
 #include <stddef.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
