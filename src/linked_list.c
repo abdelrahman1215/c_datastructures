@@ -1,4 +1,4 @@
-#include "mem.c"
+#include "copy_object.c"
 #include <stdlib.h>
 #include "../headers/linked_list.h"
 

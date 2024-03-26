@@ -1,4 +1,4 @@
-#include "mem.c"
+#include "copy_object.c"
 #include <string.h>
 #include <stdlib.h>
 #include "../headers/hashmap.h"
