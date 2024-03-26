@@ -5,9 +5,6 @@
 extern "C"{
 #endif
 
-//todo :
-//edit test_script
-
 #include "def.h"
 
 typedef struct AVL_node AVL_node;
