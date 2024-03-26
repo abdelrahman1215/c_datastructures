@@ -6,8 +6,7 @@ extern "C"{
 #endif
 
 //todo :
-//write test
-//write test_script
+//edit test_script
 
 #include "def.h"
 

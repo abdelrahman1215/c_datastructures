@@ -9,6 +9,10 @@ list_test:
 	make linked_list
 	gcc -Wall -g3 -o LinkedListTest.exe tests/LinkedListTest.c -Lbin -llinked_list
 
+AVL_test:
+	make AVL_tree
+	gcc -Wall -g3 -o AVL_treeTest.exe tests/AVL_treeTest.c -Lbin -lAVL_tree
+
 dynamic_array_test:
 	make dynamic_array
 	gcc -Wall -g3 -o DynamicArrayTest.exe tests/DynamicArrayTest.c -Lbin -ldynamic_array
@@ -17,6 +21,7 @@ data_tests:
 	make map_test
 	make list_test
 	make dynamic_array_test
+	make AVL_test
 
 hashmap:
 	gcc -c src/hashmap.c -o bin/hashmap.o
