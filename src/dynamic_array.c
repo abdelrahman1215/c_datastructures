@@ -174,7 +174,7 @@ datastruct_err dynamic_array_add_element(dynamic_array *vec_ptr , void *obj_ptr)
     mem_chunk *target_chunk = vec_ptr -> chunks_ptr[vec_ptr -> chunk_no - 1];
     void *target_address = (char *)target_chunk -> mem_ptr + (target_chunk -> used_size);
 
-    memcpy_s(target_address , vec_ptr -> obj_actual_size , obj_ptr , vec_ptr -> obj_actual_size);
+    memcpy(target_address , obj_ptr , vec_ptr -> obj_actual_size);
 
     target_chunk -> used_size += vec_ptr -> obj_rounded_size;
     vec_ptr -> elements_no++;
@@ -259,7 +259,7 @@ datastruct_err dynamic_array_remove_element(dynamic_array *vec_ptr , u64 index){
         /*                                   */- vec_ptr -> obj_rounded_size;
 
         if(size_to_copy > 0){
-            memcpy_s(target , size_to_copy , (char *)target + vec_ptr -> obj_rounded_size , size_to_copy);
+            memcpy(target , (char *)target + vec_ptr -> obj_rounded_size , size_to_copy);
         }
 
         if(i == vec_ptr -> chunk_no - 1){
@@ -267,7 +267,7 @@ datastruct_err dynamic_array_remove_element(dynamic_array *vec_ptr , u64 index){
         }
 
         target = (char *)target_chunk -> mem_ptr + target_chunk -> used_size - vec_ptr -> obj_actual_size;
-        memcpy_s(target , vec_ptr -> obj_rounded_size , vec_ptr -> chunks_ptr[i + 1] -> mem_ptr , vec_ptr -> obj_rounded_size);
+        memcpy(target , vec_ptr -> chunks_ptr[i + 1] -> mem_ptr , vec_ptr -> obj_rounded_size);
     }
 
     if(i > 0 && target_chunk -> used_size == 0){
@@ -303,7 +303,7 @@ datastruct_err dynamic_array_edit_element(dynamic_array *vec_ptr , u64 index , v
         vec_ptr -> free_obj(copy_object(target , vec_ptr -> obj_actual_size));
     }
 
-    memcpy_s(target , vec_ptr -> obj_actual_size , new_val_ptr , vec_ptr -> obj_actual_size);
+    memcpy(target , new_val_ptr , vec_ptr -> obj_actual_size);
 
     return Success;
 }

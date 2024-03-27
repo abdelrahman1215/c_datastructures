@@ -18,7 +18,7 @@ void *copy_object(void *obj_ptr , size_t obj_size){
         return NULL;
     }
 
-    memcpy_s(copy , obj_size , obj_ptr , obj_size);
+    memcpy(copy , obj_ptr , obj_size);
 
     return copy;
 }
