@@ -259,7 +259,7 @@ datastruct_err dynamic_array_remove_element(dynamic_array *vec_ptr , u64 index){
         /*                                   */- vec_ptr -> obj_rounded_size;
 
         if(size_to_copy > 0){
-            memcpy(target , (char *)target + vec_ptr -> obj_rounded_size , size_to_copy);
+            memmove(target , (char *)target + vec_ptr -> obj_rounded_size , size_to_copy);
         }
 
         if(i == vec_ptr -> chunk_no - 1){
