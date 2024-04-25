@@ -1,4 +1,3 @@
-remove_command = del
 CC = gcc
 
 libs:
@@ -33,22 +32,18 @@ hashmap:
 	$(shell mkdir bin)
 	$(CC) -c src/hashmap.c -o bin/hashmap.o
 	ar rcs bin/libhashmap.a bin/hashmap.o
-	$(remove_command) bin\hashmap.o
 	
 linked_list:
 	$(shell mkdir bin)
 	$(CC) -c src/linked_list.c -o bin/linked_list.o
 	ar rcs bin/liblinked_list.a bin/linked_list.o
-	$(remove_command) bin\linked_list.o
 
 dynamic_array:
 	$(shell mkdir bin)
 	$(CC) -c src/dynamic_array.c -o bin/dynamic_array.o
 	ar rcs bin/libdynamic_array.a bin/dynamic_array.o
-	$(remove_command) bin\dynamic_array.o
 
 AVL_tree:
 	$(shell mkdir bin)
 	$(CC) -c src/AVL_tree.c -o bin/AVL_tree.o
 	ar rcs bin/libAVL_tree.a bin/AVL_tree.o
-	$(remove_command) bin\AVL_tree.o
