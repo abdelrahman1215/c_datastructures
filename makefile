@@ -1,5 +1,8 @@
-test:
-	gcc -Wall -g3 -o test.exe test.c -Lbin -lhashmap -llinked_list -ldynamic_array -lAVL_tree
+libs:
+	make hashmap
+	make linked_list
+	make dynamic_array
+	make AVL_tree
 
 map_test:
 	make hashmap
@@ -42,9 +45,3 @@ AVL_tree:
 	gcc -c src/AVL_tree.c -o bin/AVL_tree.o
 	ar rcs bin/libAVL_tree.a bin/AVL_tree.o
 	del bin\AVL_tree.o
-
-libs:
-	make hashmap
-	make linked_list
-	make dynamic_array
-	make AVL_tree
