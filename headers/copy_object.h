@@ -7,21 +7,11 @@ extern "C" {
 
 #include "../headers/def.h"
 
-
 /// @brief dynamically allocates a copy of an object
 /// @param obj_ptr a pointer to the object
 /// @param obj_size the size of the object
 /// @return a pointer to the copy
-extern void *copy_object(void *obj_ptr , size_t obj_size){
-    void *copy = calloc(1 , obj_size);
-    if(!copy){
-        return NULL;
-    }
-
-    memcpy(copy , obj_ptr , obj_size);
-
-    return copy;
-}
+extern void *copy_object(void *obj_ptr , size_t obj_size);
 
 #ifdef __cplusplus
 }

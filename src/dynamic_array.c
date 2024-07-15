@@ -1,4 +1,4 @@
-#include "copy_object.c"
+#include "../headers/copy_object.h"
 #include <stdlib.h>
 #include "../headers/dynamic_array.h"
 

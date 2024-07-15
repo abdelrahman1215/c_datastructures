@@ -1,4 +1,4 @@
-#include "copy_object.c"
+#include "../headers/copy_object.h"
 #include <string.h>
 #include <stdlib.h>
 #include "../headers/hashmap.h"

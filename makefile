@@ -21,19 +21,19 @@ data_tests:
 
 hashmap: bin/
 	$(CC) -c src/hashmap.c -o bin/hashmap.o
-	ar rcs bin/libhashmap.a bin/hashmap.o
+	ar rcs bin/libhashmap.a bin/hashmap.o bin/copy_object.o
 	
 linked_list:bin/
 	$(CC) -c src/linked_list.c -o bin/linked_list.o
-	ar rcs bin/liblinked_list.a bin/linked_list.o
+	ar rcs bin/liblinked_list.a bin/linked_list.o bin/copy_object.o
 
 dynamic_array:bin/
 	$(CC) -c src/dynamic_array.c -o bin/dynamic_array.o
-	ar rcs bin/libdynamic_array.a bin/dynamic_array.o
+	ar rcs bin/libdynamic_array.a bin/dynamic_array.o bin/copy_object.o
 
 AVL_tree:bin/
 	$(CC) -c src/AVL_tree.c -o bin/AVL_tree.o
-	ar rcs bin/libAVL_tree.a bin/AVL_tree.o
+	ar rcs bin/libAVL_tree.a bin/AVL_tree.o bin/copy_object.o
 
 libs:
 	$(MAKE) hashmap
@@ -43,3 +43,4 @@ libs:
 	
 bin/:
 	$(shell mkdir bin)
+	$(CC) -c src/copy_object.c -o bin/copy_object.o
