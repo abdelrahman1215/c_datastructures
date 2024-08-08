@@ -295,12 +295,12 @@ entry *hashmap_lookup_entry(const char *key , hashmap *map_ptr){
     return NULL;
 }
 
-void *hashmap_get_obj_ptr(entry *entry_ptr){
+void *hashmap_get_obj(entry *entry_ptr){
     if(!entry_ptr){
         return NULL;
     }
 
-    return entry_ptr -> obj_ptr;
+    return copy_object(entry_ptr -> obj_ptr , entry_ptr -> obj_size);
 }
 
 size_t hashmap_get_obj_size(entry *entry_ptr){

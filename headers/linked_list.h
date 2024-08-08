@@ -73,8 +73,8 @@ node *linked_list_get_next_node(node *node_ptr);
 
 /// @brief get the object stored in a node
 /// @param node_ptr a pointer to the node
-/// @return a pointer to the object
-void *linked_list_get_obj_ptr(node *node_ptr);
+/// @return a pointer to (a copy of) the object
+void *linked_list_get_obj(node *node_ptr);
 
 /// @brief get the size of the object stored in a node
 /// @param node_ptr a pointer to the node

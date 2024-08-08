@@ -205,12 +205,12 @@ node *linked_list_get_next_node(node *node_ptr){
     return node_ptr -> next;
 }
 
-void *linked_list_get_obj_ptr(node *node_ptr){
+void *linked_list_get_obj(node *node_ptr){
     if(!node_ptr){
         return NULL;
     }
 
-    return node_ptr -> obj_ptr;
+    return copy_object(node_ptr -> obj_ptr , node_ptr -> obj_size);
 }
 
 size_t linked_list_get_obj_size(node *node_ptr){

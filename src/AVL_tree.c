@@ -338,7 +338,7 @@ void *AVL_tree_lookup_nearest_value(AVL_tree *tree_ptr , void *val_ptr){
         }
     }
 
-    return node_ptr != NULL ? node_ptr -> obj_ptr : NULL;
+    return node_ptr != NULL ? copy_object(node_ptr -> obj_ptr , tree_ptr -> obj_size) : NULL;
 }
 
 static AVL_node *AVL_tree_lookup_node_by_value(AVL_tree *tree_ptr , void *val_ptr){

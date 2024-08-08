@@ -40,7 +40,7 @@ datastruct_err AVL_tree_delete_node(AVL_tree *tree_ptr , void *val_ptr);
 /// @brief lookup the nearest value to a supplied value in a tree
 /// @param tree_ptr a pointer to the tree
 /// @param val_ptr a pointer to the value
-/// @return the nearest value (if the value it self exists in the tree it will be returned)
+/// @return (a copy of) the nearest value (if the value it self exists in the tree it will be returned)
 void *AVL_tree_lookup_nearest_value(AVL_tree *tree_ptr , void *val_ptr);
 
 /// @brief lookup a value in an AVL_tree

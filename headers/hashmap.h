@@ -54,8 +54,8 @@ entry *hashmap_lookup_entry(const char *key , hashmap *map_ptr);
 
 /// @brief get the object stored in an entry
 /// @param entry_ptr a pointer to the entry
-/// @return a pointer to the obj
-void *hashmap_get_obj_ptr(entry *entry_ptr);
+/// @return a pointer to (a copy of) the obj
+void *hashmap_get_obj(entry *entry_ptr);
 
 /// @brief get the size of the object stored in an entry
 /// @param entry_ptr a pointer to the entry
