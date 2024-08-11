@@ -27,7 +27,7 @@ void linked_list_free_node(node *node_ptr){
         return;
     }
 
-    free(node_ptr -> obj_ptr);
+    node_ptr -> free_obj(node_ptr -> obj_ptr);
     free(node_ptr);
 }
 
