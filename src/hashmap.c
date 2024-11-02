@@ -21,7 +21,7 @@ struct hashmap{
 };
 
 u32 hash1(const char *key , u32 limit){
-    size_t len = strnlen_s(key , UINT32_MAX);
+    size_t len = strnlen(key , UINT32_MAX);
 
     char f = key[0] , s = key[0 + (len > 1)], bl = key[len - (1 + (len > 1))] , l = key[len - 1];
     u32 ret = f << 24 | s << 16 | bl << 8 | l;
@@ -163,7 +163,7 @@ entry *create_entry(const char *key , free_func *free_func_ptr , void *obj_ptr ,
         return NULL;
     }
 
-    ret -> key_len = strnlen_s(key , UINT32_MAX);
+    ret -> key_len = strnlen(key , UINT32_MAX);
     ret -> key = copy_object((void *)key , ret -> key_len + 1);
     if(!ret -> key){
         free(ret);
@@ -199,7 +199,7 @@ datastruct_err hashmap_add_entry(const char *key , void *obj_ptr , size_t obj_si
     }
 
     u32 index = map_ptr -> hash_ptr(key , map_ptr -> size);
-    size_t key_len = strnlen_s(key , UINT32_MAX);
+    size_t key_len = strnlen(key , UINT32_MAX);
 
     entry **node_ptr = map_ptr -> entries + index;
     if(*node_ptr && !map_ptr -> list_of_list){
@@ -238,7 +238,7 @@ datastruct_err hashmap_delete_entry(const char* key , hashmap *map_ptr){
     entry **entries = map_ptr -> entries;
     entry *prev = NULL;
     entry *node = NULL;
-    size_t key_len = strnlen_s(key , UINT32_MAX);
+    size_t key_len = strnlen(key , UINT32_MAX);
 
     
     for(node = entries[index] ; node != NULL ; prev = node , node = node -> next){
@@ -278,7 +278,7 @@ entry *hashmap_lookup_entry(const char *key , hashmap *map_ptr){
 
     u32 index = map_ptr -> hash_ptr(key , map_ptr -> size);
     entry *node = NULL;
-    size_t key_len = strnlen_s(key , UINT32_MAX);
+    size_t key_len = strnlen(key , UINT32_MAX);
 
     
     for(node = map_ptr -> entries[index] ; node != NULL ; node = node -> next){
